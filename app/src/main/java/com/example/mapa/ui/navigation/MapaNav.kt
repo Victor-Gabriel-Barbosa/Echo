@@ -1,6 +1,7 @@
 package com.example.mapa.ui.navigation
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
@@ -40,6 +41,7 @@ import com.example.mapa.ui.screen.ChatListScreen
 import com.example.mapa.ui.screen.HomeScreen
 import com.example.mapa.ui.screen.ProfileScreen
 import com.example.mapa.ui.screen.SavedScreen
+import com.example.mapa.viewmodels.AuthViewModel
 import com.example.mapa.viewmodels.ChatListViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -50,10 +52,20 @@ import org.koin.androidx.compose.koinViewModel
  */
 @Composable
 fun MapaNav(
-    userUiState: UserUiState,
+    authViewModel: AuthViewModel = koinViewModel(),
     chatListViewModel: ChatListViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
+
+    // Observáveis do ViewModel
+    val userUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+
+    // Feedback visual (eventos) vindo do ViewModel
+    LaunchedEffect(Unit) {
+        authViewModel.channel.collect { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // Estado da navegação principal
     val backStack = rememberSaveable { mutableStateListOf<Routes>(Routes.Home) }
@@ -104,7 +116,7 @@ fun MapaNav(
                         when (item) {
                             AppRotas.PROFILE if userUiState.user?.photo != null -> {
                                 AvatarImg(
-                                    photoUrl = userUiState.user.photo,
+                                    photoUrl = userUiState.user?.photo,
                                     modifier = Modifier
                                         .size(24.dp)
                                         .border(
@@ -171,6 +183,7 @@ fun MapaNav(
                     Routes.ChatRoutes, Routes.ChatList -> NavEntry(rota) {
                         ChatListScreen(
                             onChat = { uid, localId -> backStack.add(Routes.Chat(uid, localId)) },
+                            chatListViewModel = chatListViewModel
                         )
                     }
 
@@ -183,7 +196,9 @@ fun MapaNav(
                     }
 
                     Routes.Profile -> NavEntry(rota) {
-                        ProfileScreen()
+                        ProfileScreen(
+                            authViewModel = authViewModel
+                        )
                     }
 
                     else -> error("Rota não encontrada: $rota")

@@ -69,6 +69,23 @@ class LocationRepository(
     }
 
     /**
+     * Busca um local específico pelo ID no banco de dados local.
+     *
+     * @param id O ID do local a ser buscado.
+     * @return O [LocationDTO] correspondente, ou null se não for encontrado.
+     */
+    suspend fun getLocationById(id: String): LocationDTO? {
+        return try {
+            val localSalvo = locationDao.getById(id).firstOrNull()
+
+            localSalvo?.toDTO()
+        } catch (e: Exception) {
+            Log.e("LocationRepository", "Erro ao buscar local pelo ID: ${e.message}")
+            null
+        }
+    }
+
+    /**
      * Salva um novo local na fonte de dados remota.
      *
      * @param local O objeto de transferência de dados local a ser salvo.

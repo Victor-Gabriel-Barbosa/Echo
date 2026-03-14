@@ -6,11 +6,13 @@ import com.example.mapa.data.remote.datasource.AuthRemote
 import com.example.mapa.data.remote.dto.LocationDTO
 import com.example.mapa.data.repository.LocationRepository
 import com.example.mapa.model.LocationUiState
+import com.example.mapa.util.GeofenceManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -27,7 +29,8 @@ import java.util.UUID
  */
 class LocationViewModel(
     private val locationRepo: LocationRepository,
-    authRemote: AuthRemote
+    authRemote: AuthRemote,
+    private val geofenceManager: GeofenceManager
 ) : ViewModel() {
     /**
      * Estado de carregamento.
@@ -73,6 +76,24 @@ class LocationViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = LocationUiState(loading = true)
     )
+
+    init {
+        // Observa mudanças nos locais e atualiza os geofences automaticamente
+        viewModelScope.launch {
+            combine(locationFlow, authRemote.user) { locations, user ->
+                Pair(locations, user?.uid)
+            }.collectLatest { (locations, uid) ->
+                if (uid != null && locations.isNotEmpty()) {
+                    // Atualiza o OS com os geofences ativos
+                    try {
+                        geofenceManager.setupGeofences(locations, uid)
+                    } catch (e: SecurityException) {
+                        _channel.send("Erro ao configurar Geofences: ${e.message}")
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Adiciona um novo local ao repositório.

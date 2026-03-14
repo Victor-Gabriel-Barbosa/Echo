@@ -43,14 +43,15 @@ fun Mapa(
         // Exibe a tela principal se o usuário estiver logado
         true if loginUiState is LoginUiState.Stopped -> {
             MapaNav(
-                userUiState = userUiState
+                authViewModel = authViewModel
             )
         }
 
         // Caso contrário, exibe a tela de autenticação
         else -> {
             AuthNav(
-                onLogin = { authViewModel.resetState() }
+                onLogin = { authViewModel.resetState() },
+                authViewModel = authViewModel
             )
         }
     }

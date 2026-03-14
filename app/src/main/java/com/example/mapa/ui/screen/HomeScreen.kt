@@ -43,7 +43,7 @@ import com.example.mapa.ui.components.LoadingOverlay
 import com.example.mapa.ui.components.Header
 import com.example.mapa.ui.components.LocationDetails
 import com.example.mapa.ui.theme.MapaTheme
-import com.example.mapa.util.ReqPerms
+import com.example.mapa.util.ReqPermissions
 import com.example.mapa.viewmodels.LocationViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -70,16 +70,18 @@ fun HomeScreen(
     // Variáveis de estado para o mapa
     val locationUiState by locationViewModel.uiState.collectAsStateWithLifecycle()
     val cameraPositionState = rememberCameraPositionState()
-    var permsLocationOk by rememberSaveable { mutableStateOf(false) }
+    var fgPermission by rememberSaveable { mutableStateOf(false) }
 
     // Solicita permissões quando o usuário entra na tela
-    ReqPerms(
-        onPermsChange = { permsLocationOk = it }
+    ReqPermissions(
+        onPermissionsChange = { fg, _ ->
+            fgPermission = fg
+        }
     )
 
     // Atualiza a posição do mapa quando as permissões são concedidas
-    LaunchedEffect(permsLocationOk) {
-        if (permsLocationOk) {
+    LaunchedEffect(fgPermission) {
+        if (fgPermission) {
             @SuppressLint("MissingPermission")
             LocationServices.getFusedLocationProviderClient(context).lastLocation
                 .addOnSuccessListener { location ->
@@ -105,7 +107,7 @@ fun HomeScreen(
         user = user,
         locationUiState = locationUiState,
         cameraPositionState = cameraPositionState,
-        permsLocation = permsLocationOk,
+        permsLocation = fgPermission,
         onAddLocation = { locationViewModel.insertLocation(it) },
         onEditLocation = { locationViewModel.updateLocation(it) },
         onDeleteLocation = { locationViewModel.deleteLocation(it) },

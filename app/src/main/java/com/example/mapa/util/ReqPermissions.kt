@@ -22,11 +22,11 @@ import com.example.mapa.R
 /**
  * Solicita permissões para o usuário.
  *
- * @param onPermsChange Callback que é chamado quando as permissões são alteradas.
+ * @param onPermissionsChange Callback que é chamado quando as permissões são alteradas.
  */
 @Composable
-fun ReqPerms(
-    onPermsChange: (Boolean, Boolean) -> Unit
+fun ReqPermissions(
+    onPermissionsChange: (Boolean, Boolean) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -41,18 +41,15 @@ fun ReqPerms(
         )
     }
 
-    // Permissão de notificação
-    val notificationPerm = Manifest.permission.POST_NOTIFICATIONS
-
     // Launcher para permissão de segundo plano
     val bgLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { ok ->
-        onPermsChange(true, ok)
+        onPermissionsChange(true, ok)
     }
 
     // Launcher para permissão de notificação
-    val notificationLauncher = rememberLauncherForActivityResult(
+    val notifLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { }
 
@@ -60,20 +57,20 @@ fun ReqPerms(
     val fgLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { ok ->
-        val fgOk =
-            ok[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                    ok[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        val fgOk = ok[Manifest.permission.ACCESS_FINE_LOCATION] == true || ok[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
         if (fgOk) {
+            // Solicita permissão de notificação (Android 13+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val notifOk = ContextCompat.checkSelfPermission(
                     context,
-                    notificationPerm
+                    Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
 
-                if (!notifOk) notificationLauncher.launch(notificationPerm)
+                if (!notifOk) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
 
+            // Verifica permissão de localização em segundo plano
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val bgOk = ContextCompat.checkSelfPermission(
                     context,
@@ -81,11 +78,12 @@ fun ReqPerms(
                 ) == PackageManager.PERMISSION_GRANTED
 
                 if (!bgOk) {
-                    onPermsChange(true, false)
+                    onPermissionsChange(true, false)
                     showBgRationale = true
-                } else onPermsChange(true, true)
-            } else onPermsChange(true, true)
-        } else onPermsChange(false, false)
+                } else onPermissionsChange(true, true)
+            } else onPermissionsChange(true, true)
+
+        } else onPermissionsChange(false, false)
     }
 
     // Verifica se as permissões já foram concedidas
@@ -95,15 +93,17 @@ fun ReqPerms(
         }
 
         if (fgOk) {
+            // Solicita permissão de notificação (Android 13+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val notifOk = ContextCompat.checkSelfPermission(
                     context,
-                    notificationPerm
+                    Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
 
-                if (!notifOk) notificationLauncher.launch(notificationPerm)
+                if (!notifOk) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
 
+            // Verifica permissão de localização em segundo plano
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val bgOk = ContextCompat.checkSelfPermission(
                     context,
@@ -111,10 +111,11 @@ fun ReqPerms(
                 ) == PackageManager.PERMISSION_GRANTED
 
                 if (!bgOk) {
-                    onPermsChange(true, false)
+                    onPermissionsChange(true, false)
                     showBgRationale = true
-                } else onPermsChange(true, true)
-            } else onPermsChange(true, true)
+                } else onPermissionsChange(true, true)
+            } else onPermissionsChange(true, true)
+
         } else fgLauncher.launch(fgPerms)
     }
 
@@ -134,9 +135,7 @@ fun ReqPerms(
                 TextButton(
                     onClick = {
                         showBgRationale = false
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            bgLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) bgLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                     }
                 ) {
                     Text(stringResource(R.string.continuar))

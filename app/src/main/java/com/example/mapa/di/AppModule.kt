@@ -13,6 +13,7 @@ import com.example.mapa.data.remote.firebase.UserFirebase
 import com.example.mapa.data.repository.ChatRepository
 import com.example.mapa.data.repository.LocationRepository
 import com.example.mapa.data.repository.UserRepository
+import com.example.mapa.util.GeofenceManager
 import com.example.mapa.viewmodels.AuthViewModel
 import com.example.mapa.viewmodels.ChatListViewModel
 import com.example.mapa.viewmodels.ChatViewModel
@@ -34,6 +35,9 @@ val appModule = module {
     single { FirebaseFirestore.getInstance() }
     single { FirebaseStorage.getInstance() }
     single { FirebaseMessaging.getInstance() }
+
+    // Geofence
+    single { GeofenceManager(androidContext()) }
 
     // Room
     single {
@@ -64,7 +68,7 @@ val appModule = module {
 
     // ViewModels
     viewModel { AuthViewModel(get(), get()) }
-    viewModel { LocationViewModel(get(), get()) }
+    viewModel { LocationViewModel(get(), get(), get()) }
     viewModel { ChatViewModel(get(), get(), get()) }
     viewModel { ChatListViewModel(get(), get(), get()) }
 }

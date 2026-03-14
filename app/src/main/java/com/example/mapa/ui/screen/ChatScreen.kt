@@ -202,7 +202,7 @@ fun ChatScreenContent(
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(2f)
                         )
 
                         Spacer(Modifier.width(8.dp))

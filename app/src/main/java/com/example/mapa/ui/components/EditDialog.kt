@@ -13,6 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.mapa.R
 import com.example.mapa.ui.theme.MapaTheme
@@ -37,6 +38,7 @@ fun EditDialog(
     initialText: String = "",
     title: String = "",
     label: String = "",
+    maxLength: Int = 20,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
     textConfirm: String = stringResource(R.string.salvar),
@@ -52,9 +54,18 @@ fun EditDialog(
         text = {
             OutlinedTextField(
                 value = text,
-                onValueChange = { text = it },
+                onValueChange = {
+                    if (it.length <= maxLength) text = it
+                },
                 label = { Text(label) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = {
+                    Text(
+                        text = "${text.length} / $maxLength",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End
+                    )
+                }
             )
         },
         confirmButton = {

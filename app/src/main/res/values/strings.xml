@@ -44,12 +44,12 @@
     <string name="excluir_local">Excluir Local</string>
     <string name="tem_certeza_que_deseja_excluir_essa_acao_nao_pode_ser_desfeita">Tem certeza que deseja excluir <b>\'%1$s\'?</b> Essa ação não pode ser desfeita</string>
     <string name="sim_excluir">Sim, excluir</string>
-    <string name="mensagem">Mensagem...</string>
+    <string name="mensagem">Mensagem…</string>
     <string name="enviar">Enviar</string>
     <string name="lido">Lido</string>
     <string name="enviado">Enviado</string>
     <string name="confirmar_senha">Confirmar senha</string>
-    <string name="carregando">Carregando...</string>
+    <string name="carregando">Carregando…</string>
     <string name="voltar">Voltar</string>
     <string name="local_marcado">Local marcado</string>
     <string name="esconder_senha">Esconder senha</string>
@@ -83,7 +83,7 @@
     <string name="nenhum_local_salvo">Nenhum local salvo</string>
     <string name="imagem">Imagem</string>
     <string name="foto">Foto</string>
-    <string name="pesquisar_conversa">Pesquisar conversa...</string>
+    <string name="pesquisar_conversa">Pesquisar conversa…</string>
     <string name="pesquisar">Pesquisar</string>
     <string name="limpar_pesquisa">Limpar pesquisa</string>
     <string name="nenhuma_conversa_encontrada">Nenhuma conversa encontrada</string>
@@ -95,7 +95,7 @@
     <string name="tem_certeza_que_deseja_sair">Tem certeza que deseja sair?</string>
     <string name="sair">Sair</string>
     <string name="sair_pergunta">Sair?</string>
-    <string name="descricao_reticencias">Descrição...</string>
+    <string name="descricao_reticencias">Descrição…</string>
     <string name="ir_para_o_fim">Ir para o fim</string>
     <string name="usuario_sem_foto">Usuário sem foto</string>
     <string name="nenhum_local_encontrado">Nenhum local encontrado</string>
@@ -113,11 +113,14 @@
     <string name="excluir_mensagem">Excluir mensagem</string>
     <string name="abrir_configuracoes">Abrir Configurações</string>
     <string name="permitir_localizacao_em_segundo_plano">Permitir localização em segundo plano</string>
-    <string name="explicacao_permissao_background">O app precisa da sua localização, inclusive em segundo plano, para exibir corretamente as informações no mapa. Para isso, selecione “Permitir o tempo todo” na próxima tela. Você pode mudar essa permissão quando quiser nas configurações.</string>
+    <string name="explicacao_permissao_background">Para receber notificações ao entrar em áreas marcadas, mesmo com o app fechado, precisamos de acesso à sua localização o tempo todo. Na próxima tela, selecione <b>\'Permitir o tempo todo\'</b>.</string>
     <string name="agora_nao">Agora não</string>
     <string name="nota">Nota: %1$d</string>
     <string name="avaliar_usuario">Avaliar %1$s</string>
     <string name="voce_esta_perto_de_um_item_perdido">Você está perto de um item perdido</string>
     <string name="voce_esta_proximo_de">Você está próximo de: %1$s</string>
     <string name="mapa">Mapa</string>
+    <string name="configuracoes_do_app">Configurações do App</string>
+    <string name="aviso_de_permissao">Aviso de Permissão</string>
+    <string name="continuar">Continuar</string>
 </resources>

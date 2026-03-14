@@ -1,5 +1,8 @@
 package com.example.mapa.ui.screen
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -11,7 +14,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -19,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,10 +80,20 @@ fun ProfileScreen(
         }
     }
 
+    // Abre as configurações do aplicativo
+    val openAppSettings = {
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", context.packageName, null)
+        )
+        context.startActivity(intent)
+    }
+
     ProfileScreenContent(
         onLogout = authViewModel::logout,
-        onEditarFoto = authViewModel::updatePhoto,
-        onEditarNome = authViewModel::updateName,
+        onEditPhoto = authViewModel::updatePhoto,
+        onEditName = authViewModel::updateName,
+        onOpenSettings = openAppSettings,
         userUiState = usuarioUiState,
         modifier = modifier
     )
@@ -87,8 +103,9 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenContent(
     onLogout: () -> Unit,
-    onEditarFoto: (String) -> Unit,
-    onEditarNome: (String) -> Unit,
+    onEditPhoto: (String) -> Unit,
+    onEditName: (String) -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     userUiState: UserUiState
 ) {
@@ -100,7 +117,7 @@ fun ProfileScreenContent(
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            if (uri != null) onEditarFoto(uri.toString())
+            if (uri != null) onEditPhoto(uri.toString())
         }
     )
 
@@ -112,7 +129,7 @@ fun ProfileScreenContent(
         label = stringResource(R.string.nome),
         onDismiss = { showEditDialog = false },
         onConfirm = {
-            onEditarNome(it)
+            onEditName(it)
             showEditDialog = false
         }
     )
@@ -131,10 +148,41 @@ fun ProfileScreenContent(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Header(
-            title = stringResource(R.string.perfil),
-            icon = R.drawable.logo
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Header(
+                title = stringResource(R.string.perfil),
+                icon = R.drawable.logo,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, end = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Below),
+                    tooltip = {
+                        PlainTooltip {
+                            Text(stringResource(R.string.configuracoes_do_app))
+                        }
+                    },
+                    state = rememberTooltipState()
+                ) {
+                    IconButton(
+                        onClick = onOpenSettings
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = stringResource(R.string.configuracoes_do_app)
+                        )
+                    }
+                }
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -259,8 +307,9 @@ fun ProfileScreenContentPreview() {
                 loadingName = false
             ),
             onLogout = {},
-            onEditarFoto = {},
-            onEditarNome = {}
+            onEditPhoto = {},
+            onEditName = {},
+            onOpenSettings = {}
         )
     }
 }
