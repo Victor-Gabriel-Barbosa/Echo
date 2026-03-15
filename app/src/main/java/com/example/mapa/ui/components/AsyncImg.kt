@@ -6,22 +6,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.example.mapa.R
 import com.example.mapa.ui.theme.MapaTheme
 
 /**
@@ -31,57 +30,63 @@ import com.example.mapa.ui.theme.MapaTheme
  * @param modifier [Modifier] para customizar o layout, tamanho e comportamento do componente.
  */
 @Composable
-fun AvatarImg(
-    photoUrl: String?,
-    modifier: Modifier = Modifier
+fun AsyncImg(
+    model: Any?,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    shape: Shape = CircleShape,
+    errorIcon: ImageVector = Icons.Default.BrokenImage,
+    loadingContent: @Composable () -> Unit = {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingAnimation()
+        }
+    },
+    errorContent: @Composable () -> Unit = {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = errorIcon,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
 ) {
     Surface(
         modifier = modifier,
-        shape = CircleShape
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         SubcomposeAsyncImage(
             model = ImageRequest
                 .Builder(LocalContext.current)
-                .data(photoUrl)
+                .data(model)
                 .crossfade(true)
                 .build(),
-            contentDescription = stringResource(R.string.foto_de_perfil),
+            contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
-            loading = {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadingAnimation()
-                }
-            },
-            error = {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = stringResource(R.string.usuario_sem_foto),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+            loading = { loadingContent() },
+            error = { errorContent() }
         )
     }
 }
 
 @Preview
 @Composable
-private fun AvatarImgPreview() {
+private fun AsyncImgPreview() {
     MapaTheme {
-        AvatarImg(
-            photoUrl = "https://placekitten.com/200/200",
-            modifier = Modifier.size(48.dp)
+        AsyncImg(
+            model = "https://placekitten.com/200/200",
+            modifier = Modifier.size(48.dp),
+            contentDescription = null
         )
     }
 }
