@@ -9,6 +9,7 @@ Aplicativo Android para registro e compartilhamento de locais de **objetos perdi
 | Autenticação | Mapa (Home) | Salvos | Chat | Perfil |
 |:---:|:---:|:---:|:---:|:---:|
 | Login / Cadastro | Marcadores no mapa | Seus registros | Mensagens em tempo real | Avaliações e dados |
+>![alt text](Screenshot_20260315_174331.png)
 
 ---
 

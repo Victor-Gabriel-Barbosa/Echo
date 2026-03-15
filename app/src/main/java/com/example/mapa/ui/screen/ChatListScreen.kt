@@ -53,7 +53,7 @@ import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.model.ChatItem
 import com.example.mapa.model.ChatListUiState
 import com.example.mapa.ui.components.LottieAnimation
-import com.example.mapa.ui.components.AvatarImg
+import com.example.mapa.ui.components.AsyncImg
 import com.example.mapa.ui.components.SearchBar
 import com.example.mapa.ui.components.LoadingOverlay
 import com.example.mapa.ui.components.Header
@@ -112,7 +112,7 @@ fun ChatListScreenContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                    .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -155,6 +155,7 @@ fun ChatListScreenContent(
         }
 
         SearchBar(
+            search = search,
             onSearch = { search = it },
             modifier = Modifier
                 .fillMaxWidth()
@@ -294,8 +295,10 @@ fun ConversaItem(
                         }
                     }
                 ) {
-                    AvatarImg(
-                        photoUrl = chatItem.contact?.photo,
+                    AsyncImg(
+                        model = chatItem.contact?.photo,
+                        contentDescription = stringResource(R.string.foto_de_perfil),
+                        shape = CircleShape,
                         modifier = Modifier.size(48.dp)
                     )
                 }

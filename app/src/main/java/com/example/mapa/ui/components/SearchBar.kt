@@ -12,10 +12,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,18 +27,13 @@ import com.example.mapa.ui.theme.MapaTheme
  */
 @Composable
 fun SearchBar(
+    search: String,
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Estado para armazenar o texto de pesquisa
-    var search by rememberSaveable { mutableStateOf("") }
-
     OutlinedTextField(
         value = search,
-        onValueChange = {
-            search = it
-            onSearch(it)
-        },
+        onValueChange = { onSearch(it) },
         modifier = modifier,
         placeholder = { Text("${stringResource(R.string.pesquisar)}...") },
         leadingIcon = {
@@ -54,10 +45,7 @@ fun SearchBar(
         trailingIcon = {
             if (search.isNotEmpty()) {
                 IconButton(
-                    onClick = {
-                        search = ""
-                        onSearch("")
-                    }
+                    onClick = { onSearch("") }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -80,6 +68,7 @@ fun SearchBar(
 private fun SearchBarPreview() {
     MapaTheme {
         SearchBar(
+            search = "",
             onSearch = {},
             modifier = Modifier
                 .fillMaxWidth()

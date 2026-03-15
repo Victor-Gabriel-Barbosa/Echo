@@ -62,6 +62,7 @@ import com.example.mapa.R
 import com.example.mapa.data.remote.dto.LocationDTO
 import com.example.mapa.model.SheetUiState
 import com.example.mapa.model.LocationUiState
+import com.example.mapa.ui.components.AsyncImg
 import com.example.mapa.ui.components.LottieAnimation
 import com.example.mapa.ui.components.SearchBar
 import com.example.mapa.ui.components.DeleteDialog
@@ -159,6 +160,7 @@ fun SavedScreenContent(
         )
 
         SearchBar(
+            search = search,
             onSearch = { search = it },
             modifier = Modifier
                 .fillMaxWidth()
@@ -319,20 +321,13 @@ fun LocalItem(
                 modifier = Modifier.size(48.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    if (local.imgUrls.isNotEmpty()) {
-                        AsyncImage(
-                            model = local.imgUrls[0],
-                            contentDescription = local.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Outlined.LocationOn,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
+                    AsyncImg(
+                        model = local.imgUrls.firstOrNull(),
+                        contentDescription = local.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                        errorIcon = Icons.Outlined.LocationOn
+                    )
                 }
             }
         },

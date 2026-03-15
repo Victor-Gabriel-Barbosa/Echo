@@ -3,7 +3,6 @@ package com.example.mapa.ui.navigation
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.mapa.R
 import com.example.mapa.data.remote.dto.UserDTO
-import com.example.mapa.model.UserUiState
-import com.example.mapa.ui.components.AvatarImg
+import com.example.mapa.ui.components.AsyncImg
 import com.example.mapa.ui.screen.ChatScreen
 import com.example.mapa.ui.screen.ChatListScreen
 import com.example.mapa.ui.screen.HomeScreen
@@ -115,8 +114,10 @@ fun MapaNav(
                     icon = {
                         when (item) {
                             AppRotas.PROFILE if userUiState.user?.photo != null -> {
-                                AvatarImg(
-                                    photoUrl = userUiState.user?.photo,
+                                AsyncImg(
+                                    model = userUiState.user?.photo,
+                                    contentDescription = stringResource(R.string.foto_de_perfil),
+                                    shape = CircleShape,
                                     modifier = Modifier
                                         .size(24.dp)
                                         .border(

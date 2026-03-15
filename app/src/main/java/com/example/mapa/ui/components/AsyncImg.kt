@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -34,7 +35,8 @@ fun AsyncImg(
     model: Any?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    shape: Shape = CircleShape,
+    shape: Shape = RectangleShape,
+    contentScale: ContentScale = ContentScale.Crop,
     errorIcon: ImageVector = Icons.Default.BrokenImage,
     loadingContent: @Composable () -> Unit = {
         Box(
@@ -72,7 +74,7 @@ fun AsyncImg(
                 .crossfade(true)
                 .build(),
             contentDescription = contentDescription,
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale,
             loading = { loadingContent() },
             error = { errorContent() }
         )

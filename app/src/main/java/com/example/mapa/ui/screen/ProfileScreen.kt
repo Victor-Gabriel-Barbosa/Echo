@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
@@ -32,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
@@ -55,7 +58,7 @@ import com.example.mapa.R
 import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.model.UserUiState
 import com.example.mapa.ui.components.LoadingAnimation
-import com.example.mapa.ui.components.AvatarImg
+import com.example.mapa.ui.components.AsyncImg
 import com.example.mapa.ui.components.ConfirmDialog
 import com.example.mapa.ui.components.EditDialog
 import com.example.mapa.ui.components.Header
@@ -160,7 +163,7 @@ fun ProfileScreenContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, end = 8.dp),
+                    .padding(end = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
                 TooltipBox(
@@ -192,14 +195,18 @@ fun ProfileScreenContent(
             verticalArrangement = Arrangement.Center
         ) {
             Box(
-                modifier = Modifier.size(120.dp),
+                modifier = Modifier.size(132.dp),
                 contentAlignment = Alignment.Center
             ) {
                 // Avatar com feedback de carregamento
                 if (userUiState.loadingPhoto) LoadingAnimation(size = 48.dp)
-                else AvatarImg(
-                    photoUrl = userUiState.user?.photo,
-                    modifier = Modifier.size(120.dp)
+                else AsyncImg(
+                    model = userUiState.user?.photo,
+                    contentDescription = stringResource(R.string.foto_de_perfil),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(132.dp)
+                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                 )
 
                 Box(
@@ -237,11 +244,37 @@ fun ProfileScreenContent(
                 }
             }
 
-            Text(
-                text = "${userUiState.user?.averageRating}"
-            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Badge de avaliação
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(0.dp))
+
+                    Text(
+                        text = "${userUiState.user?.averageRating ?: 0.0}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -278,7 +311,7 @@ fun ProfileScreenContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = { showConfirmDialog = true },

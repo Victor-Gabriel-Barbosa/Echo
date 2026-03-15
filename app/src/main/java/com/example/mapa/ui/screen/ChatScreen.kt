@@ -84,7 +84,7 @@ import com.example.mapa.data.remote.dto.MsgDTO
 import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.model.ChatUiState
 import com.example.mapa.ui.components.LoadingAnimation
-import com.example.mapa.ui.components.AvatarImg
+import com.example.mapa.ui.components.AsyncImg
 import com.example.mapa.ui.components.BubbleMsg
 import com.example.mapa.ui.components.CarouselImg
 import com.example.mapa.ui.components.ReviewDialog
@@ -190,8 +190,10 @@ fun ChatScreenContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (chatUiState.loadingPhoto) LoadingAnimation()
-                        else AvatarImg(
-                            photoUrl = chatUiState.contact?.photo,
+                        else AsyncImg(
+                            model = chatUiState.contact?.photo,
+                            contentDescription = stringResource(R.string.foto_de_perfil),
+                            shape = CircleShape,
                             modifier = Modifier.size(40.dp)
                         )
 

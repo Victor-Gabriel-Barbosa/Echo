@@ -149,7 +149,7 @@ fun BubbleMsg(
             ) {
                 Column {
                     msg.imgUrls.forEach {
-                        AsyncImage(
+                        AsyncImg(
                             model = it,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,

@@ -85,13 +85,10 @@ fun CarouselImg(
                             .fillMaxSize()
                             .clickable { showDialogImg = imgUrls[index] }
                     ) {
-                        AsyncImage(
+                        AsyncImg(
                             model = imgUrls[index],
                             contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize(),
-                            placeholder = rememberVectorPainter(Icons.Default.Image),
-                            error = rememberVectorPainter(Icons.Default.BrokenImage)
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                     if (onRemoverImg != null) {
