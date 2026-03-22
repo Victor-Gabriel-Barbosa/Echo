@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +38,7 @@ fun RatingBar(
             Icon(
                 imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.StarBorder,
                 contentDescription = stringResource(R.string.estrela, i),
-                tint = if (i <= rating) Color(0xFFFFD700) else Color.Gray,
+                tint = if (i <= rating) MaterialTheme.colorScheme.primary else Color.Gray,
                 modifier = Modifier
                     .size(40.dp)
                     .clickable { onRatingChange(i) }

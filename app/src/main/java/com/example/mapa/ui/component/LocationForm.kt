@@ -338,7 +338,7 @@ fun LocationForm(
             ) {
                 CarouselImg(
                     imgUrls = imgUrls,
-                    onRemoverImg = { imgUrls = imgUrls - it }
+                    onRemoveImg = { imgUrls = imgUrls - it }
                 )
 
                 Row {

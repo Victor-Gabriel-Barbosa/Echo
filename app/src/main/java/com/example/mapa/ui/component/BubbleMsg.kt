@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.DropdownMenu
@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -42,14 +43,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.mapa.R
 import com.example.mapa.data.remote.dto.MsgDTO
 import com.example.mapa.ui.theme.MapaTheme
@@ -79,17 +77,16 @@ fun BubbleMsg(
     val focusManager = LocalFocusManager.current
 
     // Cores e alinhamento da mensagem
-    val textColor =
-        if (author) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = if (author) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
     val selectionColors = if (author) {
         TextSelectionColors(
             handleColor = MaterialTheme.colorScheme.onPrimary,
-            backgroundColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.25f)
+            backgroundColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
         )
     } else {
         TextSelectionColors(
             handleColor = MaterialTheme.colorScheme.primary,
-            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
         )
     }
 
@@ -98,21 +95,18 @@ fun BubbleMsg(
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
     var showImgDialog by rememberSaveable { mutableStateOf<String?>(null) }
 
-    ImgDialog(
-        imgUrl = showImgDialog,
-        onDismiss = { showImgDialog = null }
-    )
+    // Formatador de data
+    val sdf = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
 
     // Forma arredondada da mensagem
     val shape = if (author) RoundedCornerShape(16.dp, 16.dp, 2.dp, 16.dp)
     else RoundedCornerShape(16.dp, 16.dp, 16.dp, 2.dp)
 
-    // Calcula o tamanho máximo da mensagem (80% da largura da tela)
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
-    val maxWidth = with(density) {
-        (windowInfo.containerSize.width * 0.8f).toDp()
-    }
+    // Diálogo de imagem com zoom
+    ImgDialog(
+        imgUrl = showImgDialog,
+        onDismiss = { showImgDialog = null }
+    )
 
     // Diálogo de edição de mensagem
     EditDialog(
@@ -120,6 +114,7 @@ fun BubbleMsg(
         initialText = msg.text,
         title = stringResource(R.string.editar_mensagem),
         label = stringResource(R.string.mensagem),
+        maxLength = 200,
         onDismiss = { showEditDialog = false },
         onConfirm = {
             showEditDialog = false
@@ -130,15 +125,15 @@ fun BubbleMsg(
     )
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = if (author) 20.dp else 0.dp, end = if (author) 0.dp else 20.dp),
         horizontalAlignment = if (author) Alignment.End else Alignment.Start
     ) {
         Surface(
             color = if (author) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             shape = shape,
             modifier = Modifier
-                .widthIn(max = maxWidth)
-                .clip(shape)
                 .clickable {
                     focusManager.clearFocus()
                     showMenu = true
@@ -175,8 +170,6 @@ fun BubbleMsg(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End
                     ) {
-                        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-
                         Text(
                             text = if (msg.edited) stringResource(R.string.editado) else "",
                             color = textColor.copy(0.7f),
@@ -195,12 +188,8 @@ fun BubbleMsg(
                             Spacer(Modifier.width(4.dp))
                             Icon(
                                 imageVector = if (msg.read) Icons.Default.DoneAll else Icons.Default.Done,
-                                contentDescription = if (msg.read) stringResource(R.string.lido) else stringResource(
-                                    R.string.enviado
-                                ),
-                                tint = if (msg.read) MaterialTheme.colorScheme.onPrimary else textColor.copy(
-                                    0.7f
-                                ),
+                                contentDescription = if (msg.read) stringResource(R.string.lido) else stringResource(R.string.enviado),
+                                tint = if (msg.read) MaterialTheme.colorScheme.onPrimary else textColor.copy(0.7f),
                                 modifier = Modifier.size(14.dp)
                             )
                         }
@@ -216,7 +205,7 @@ fun BubbleMsg(
                         text = { Text(stringResource(R.string.copiar)) },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Outlined.ContentCopy,
+                                imageVector = Icons.Outlined.CopyAll,
                                 contentDescription = stringResource(R.string.copiar_texto)
                             )
                         },
@@ -273,9 +262,10 @@ fun BubbleMsgPreview() {
             BubbleMsg(
                 msg = MsgDTO(
                     id = "1",
-                    text = "Olá, tudo bem? Encontrei o seu celular perdido",
+                    text = "Olá, tudo bem? Encontrei o seu celular perdido perto da praça dos peixinhos",
                     uid = "123",
                     read = true,
+                    edited = true,
                     timestamp = System.currentTimeMillis()
                 ),
                 author = true,
@@ -288,7 +278,7 @@ fun BubbleMsgPreview() {
             BubbleMsg(
                 msg = MsgDTO(
                     id = "2",
-                    text = "Ola",
+                    text = "Ola, poderia tirar uma foto dele? Só para confirmar que é mesmo o meu",
                     uid = "456",
                     read = true,
                     timestamp = System.currentTimeMillis()

@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material3.Icon
@@ -25,10 +24,16 @@ import coil.request.ImageRequest
 import com.example.mapa.ui.theme.MapaTheme
 
 /**
- * Componente que exibe a imagem de perfil do usuário em formato circular.
+ * Composable que exibe uma imagem de forma assíncrona.
  *
- * @param photoUrl URL ou caminho da imagem de perfil. Se nulo, exibirá o estado de erro.
- * @param modifier [Modifier] para customizar o layout, tamanho e comportamento do componente.
+ * @param model O modelo de dados da imagem.
+ * @param contentDescription A descrição do conteúdo da imagem.
+ * @param modifier O modificador para personalizar a exibição da imagem.
+ * @param shape A forma da imagem.
+ * @param contentScale A escala de conteúdo da imagem.
+ * @param errorIcon O ícone de erro a ser exibido em caso de falha na carga da imagem.
+ * @param loadingContent O conteúdo a ser exibido enquanto a imagem está sendo carregada.
+ * @param errorContent O conteúdo a ser exibido em caso de falha na carga da imagem.
  */
 @Composable
 fun AsyncImg(

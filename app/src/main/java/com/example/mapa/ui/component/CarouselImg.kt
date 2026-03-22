@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,12 +27,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.mapa.R
 import com.example.mapa.ui.theme.MapaTheme
 
@@ -43,14 +38,14 @@ import com.example.mapa.ui.theme.MapaTheme
  *
  * @param imgUrls Lista de strings contendo as URLs ou caminhos das imagens.
  * @param modifier [Modifier] para customizar o layout do container.
- * @param onRemoverImg Callback opcional para tratar a remoção de uma imagem.
+ * @param onRemoveImg Callback opcional para tratar a remoção de uma imagem.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarouselImg(
     imgUrls: List<String>,
     modifier: Modifier = Modifier,
-    onRemoverImg: ((String) -> Unit)? = null
+    onRemoveImg: ((String) -> Unit)? = null
 ) {
     if (imgUrls.isEmpty()) return
 
@@ -91,9 +86,9 @@ fun CarouselImg(
                             modifier = Modifier.fillMaxSize()
                         )
                     }
-                    if (onRemoverImg != null) {
+                    if (onRemoveImg != null) {
                         Surface(
-                            onClick = { onRemoverImg(imgUrls[index]) },
+                            onClick = { onRemoveImg(imgUrls[index]) },
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.surface,
                             shadowElevation = 4.dp,

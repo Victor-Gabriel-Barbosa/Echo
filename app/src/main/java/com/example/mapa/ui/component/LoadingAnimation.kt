@@ -24,7 +24,7 @@ import com.example.mapa.ui.theme.MapaTheme
 fun LoadingAnimation(
     modifier: Modifier = Modifier,
     size: Dp = 32.dp,
-    color: Color = MaterialTheme.colorScheme.tertiary,
+    color: Color = MaterialTheme.colorScheme.primary,
     trackColor: Color = Color.Transparent
 ) {
     CircularProgressIndicator(
