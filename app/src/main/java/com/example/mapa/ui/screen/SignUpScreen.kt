@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,7 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.mapa.R
 import com.example.mapa.model.LoginUiState
-import com.example.mapa.ui.components.LoadingAnimation
+import com.example.mapa.ui.component.LoadingAnimation
 import com.example.mapa.util.requiredLabel
 import com.example.mapa.ui.theme.MapaTheme
 
@@ -127,7 +128,7 @@ fun SignUpScreen(
         )
 
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -304,7 +305,9 @@ fun SignUpScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                     ) {
-                        Text(stringResource(R.string.ja_tem_conta_faca_login))
+                        Text(
+                            text = stringResource(R.string.ja_tem_conta_faca_login)
+                        )
                     }
                 }
             }
@@ -316,10 +319,13 @@ fun SignUpScreen(
 @Composable
 fun SignUpScreenPreview() {
     MapaTheme {
-        SignUpScreen(
-            loginUiState = LoginUiState.Stopped,
-            onSignup = { _, _ -> },
-            onNavLogin = {}
-        )
+        Scaffold { innerPadding ->
+            SignUpScreen(
+                modifier = Modifier.padding(innerPadding),
+                loginUiState = LoginUiState.Stopped,
+                onSignup = { _, _ -> },
+                onNavLogin = {}
+            )
+        }
     }
 }

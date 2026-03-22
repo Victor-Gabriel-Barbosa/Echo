@@ -1,4 +1,4 @@
-package com.example.mapa.ui.components
+package com.example.mapa.ui.component
 
 import android.content.ClipData
 import androidx.compose.foundation.clickable
@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit

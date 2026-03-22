@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,11 +53,12 @@ import com.example.mapa.data.remote.dto.MsgDTO
 import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.model.ChatItem
 import com.example.mapa.model.ChatListUiState
-import com.example.mapa.ui.components.LottieAnimation
-import com.example.mapa.ui.components.AsyncImg
-import com.example.mapa.ui.components.SearchBar
-import com.example.mapa.ui.components.LoadingOverlay
-import com.example.mapa.ui.components.Header
+import com.example.mapa.ui.component.LottieAnimation
+import com.example.mapa.ui.component.AsyncImg
+import com.example.mapa.ui.component.ConfirmDialog
+import com.example.mapa.ui.component.SearchBar
+import com.example.mapa.ui.component.LoadingOverlay
+import com.example.mapa.ui.component.Header
 import com.example.mapa.ui.theme.MapaTheme
 import com.example.mapa.viewmodels.ChatListViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -91,6 +93,9 @@ fun ChatListScreenContent(
     // Estado do texto barra de pesquisa
     var search by rememberSaveable { mutableStateOf("") }
 
+    // Estado para mostrar diálogo de confirmação de exclusão do chat
+    var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
+
     // Estado para armazenar os IDs das salas selecionadas
     var selected by rememberSaveable { mutableStateOf(emptySet<String>()) }
 
@@ -104,6 +109,20 @@ fun ChatListScreenContent(
             }
         }
     }
+
+    // Diálogo de confirmação de exclusão de chat
+    ConfirmDialog(
+        visible = showConfirmDialog,
+        title = stringResource(R.string.excluir_chat_s),
+        text = stringResource(R.string.voce_tem_certeza_que_deseja_excluir_o_s_chat_s_selecionado_s),
+        onDismiss = { showConfirmDialog = false },
+        textConfirm = stringResource(R.string.excluir),
+        onConfirm = {
+            onDelete(selected)
+            selected = emptySet()
+            showConfirmDialog = false
+        }
+    )
 
     Column(
         modifier = modifier.fillMaxSize()
@@ -136,8 +155,7 @@ fun ChatListScreenContent(
                 }
 
                 IconButton(onClick = {
-                    onDelete(selected)
-                    selected = emptySet()
+                    showConfirmDialog = true
                 }) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,
@@ -255,8 +273,8 @@ fun ChatListScreenContent(
                                 else if (item.contact?.uid?.isNotEmpty() == true) onChat(item.contact.uid, item.chat.id)
                             },
                             onLongClick = {
-                                if (selected.isEmpty()) selected = selected + item.chat.id
-                                else selected = if (selecionado) selected - item.chat.id else selected + item.chat.id
+                                selected = if (selected.isEmpty()) selected + item.chat.id
+                                else if (selecionado) selected - item.chat.id else selected + item.chat.id
                             }
                         )
                     }
@@ -274,7 +292,7 @@ fun ConversaItem(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val background = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+    val background = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
     else Color.Transparent
 
     ListItem(
@@ -386,29 +404,32 @@ fun ConversaItem(
 @Composable
 fun ChatListScreenContentPreview() {
     MapaTheme {
-        ChatListScreenContent(
-            chatListUiState = ChatListUiState(
-                loading = false,
-                error = null,
-                chats = listOf(
-                    ChatItem(
-                        chat = ChatDTO(
-                            id = "1",
-                            lastMsg = MsgDTO(text = "Olá, tudo bem?")
+        Scaffold { innerPadding ->
+            ChatListScreenContent(
+                modifier = Modifier.padding(innerPadding),
+                chatListUiState = ChatListUiState(
+                    loading = false,
+                    error = null,
+                    chats = listOf(
+                        ChatItem(
+                            chat = ChatDTO(
+                                id = "1",
+                                lastMsg = MsgDTO(text = "Olá, tudo bem?")
+                            ),
+                            contact = UserDTO(name = "João", averageRating = 4.4)
                         ),
-                        contact = UserDTO(name = "João", averageRating = 4.4)
-                    ),
-                    ChatItem(
-                        chat = ChatDTO(
-                            id = "2",
-                            lastMsg = MsgDTO(text = "Como vai?")
-                        ),
-                        contact = UserDTO(name = "Maria", averageRating = 5.0)
+                        ChatItem(
+                            chat = ChatDTO(
+                                id = "2",
+                                lastMsg = MsgDTO(text = "Como vai?")
+                            ),
+                            contact = UserDTO(name = "Maria", averageRating = 5.0)
+                        )
                     )
-                )
-            ),
-            onChat = { _, _ -> },
-            onDelete = {}
-        )
+                ),
+                onChat = { _, _ -> },
+                onDelete = {}
+            )
+        }
     }
 }

@@ -61,10 +61,10 @@ class UserFirebase(
             }
 
             if (snapshot != null) {
-                val usuarios = snapshot.documents.mapNotNull { doc ->
+                val users = snapshot.documents.mapNotNull { doc ->
                     doc.toObject(UserDTO::class.java)
                 }
-                trySend(usuarios)
+                trySend(users)
             }
         }
 

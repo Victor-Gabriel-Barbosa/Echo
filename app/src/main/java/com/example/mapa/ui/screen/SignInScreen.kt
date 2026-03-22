@@ -35,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -65,7 +66,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import com.example.mapa.R
 import com.example.mapa.model.LoginUiState
-import com.example.mapa.ui.components.LoadingAnimation
+import com.example.mapa.ui.component.LoadingAnimation
 import com.example.mapa.util.requiredLabel
 import com.example.mapa.ui.theme.MapaTheme
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -140,7 +141,7 @@ fun SignInScreen(
         )
 
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -253,15 +254,16 @@ fun SignInScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Botão de Login ou Loading
-                    if (loginUiState is LoginUiState.Loading) LoadingAnimation()
-                    else {
-                        Button(
-                            onClick = { validateSend() },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-                        ) {
+                    Button(
+                        onClick = { validateSend() },
+                        enabled = loginUiState !is LoginUiState.Loading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                    ) {
+                        if (loginUiState is LoginUiState.Loading) LoadingAnimation()
+                        else {
                             Text(
                                 text = stringResource(R.string.entrar),
                                 fontWeight = FontWeight.Bold
@@ -333,7 +335,9 @@ fun SignInScreen(
                             .fillMaxWidth()
                             .height(50.dp)
                     ) {
-                        Text(text = stringResource(R.string.nao_tem_conta_cadastre_se))
+                        Text(
+                            text = stringResource(R.string.nao_tem_conta_cadastre_se)
+                        )
                     }
                 }
             }
@@ -376,11 +380,14 @@ suspend fun signInWithGoogle(
 @Composable
 fun SignInScreenPreview() {
     MapaTheme {
-        SignInScreen(
-            loginUiState = LoginUiState.Stopped,
-            onLoginWithEmail = { _, _ -> },
-            onLoginWithGoogle = {},
-            onNavSignup = {}
-        )
+        Scaffold { innerPadding ->
+            SignInScreen(
+                modifier = Modifier.padding(innerPadding),
+                loginUiState = LoginUiState.Stopped,
+                onLoginWithEmail = { _, _ -> },
+                onLoginWithGoogle = {},
+                onNavSignup = {}
+            )
+        }
     }
 }

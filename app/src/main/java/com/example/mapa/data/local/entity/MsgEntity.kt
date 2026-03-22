@@ -14,5 +14,6 @@ data class MsgEntity(
     val text: String,
     val timestamp: Long,
     val read: Boolean,
+    val edited: Boolean,
     val imgUrls: String
 )

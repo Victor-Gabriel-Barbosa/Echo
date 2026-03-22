@@ -1,4 +1,4 @@
-package com.example.mapa.ui.components
+package com.example.mapa.ui.component
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -36,6 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -103,7 +104,12 @@ fun LocationForm(
 
     // Estado do DatePicker
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = initialLocation.date?.time ?: System.currentTimeMillis()
+        initialSelectedDateMillis = initialLocation.date?.time ?: System.currentTimeMillis(),
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis <= System.currentTimeMillis()
+            }
+        }
     )
     var datePicker by rememberSaveable { mutableStateOf(false) }
 
@@ -310,13 +316,13 @@ fun LocationForm(
 
                     Surface(
                         shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.primaryContainer
+                        color = MaterialTheme.colorScheme.primary
                     ) {
                         Text(
                             text = stringResource(R.string.metros, radius.toInt()),
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

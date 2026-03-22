@@ -6,7 +6,7 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.parcelize.Parcelize
 
 /**
- * Estados possíveis do BottomSheet na tela de Home.
+ * Estados possíveis do Sheet de formulário.
  */
 @Parcelize
 sealed interface SheetUiState : Parcelable {

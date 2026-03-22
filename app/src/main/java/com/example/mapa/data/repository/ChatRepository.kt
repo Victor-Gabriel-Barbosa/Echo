@@ -42,8 +42,8 @@ class ChatRepository(
 
         launch {
             chatRemote.getByUid(uid)
-                .catch { Log.e("ChatRepo", "Erro sync chats: $it") }
-                .collect { chats -> chatDao.insertChats(chats.map { it.toEntity() }) }
+                .catch { Log.e("ChatRepo", "getChats: $it") }
+                .collect { chats -> chatDao.syncChatsByUid(uid, chats.map { it.toEntity() }) }
         }
     }
 
@@ -63,15 +63,14 @@ class ChatRepository(
 
         launch {
             chatRemote.getById(id)
-                .catch { e -> Log.e("ChatRepo", "Erro sync mensagens da sala $id: $e") }
-                .collect { remoteMsgs -> chatDao.insertMsgs(remoteMsgs.map { it.toEntity(id) }) }
+                .catch { e -> Log.e("ChatRepo", "getMsgs: $e") }
+                .collect { remoteMsgs -> chatDao.syncMsgsByChatId(id, remoteMsgs.map { it.toEntity(id) }) }
         }
     }
 
     /**
      * Salva uma nova mensagem em uma sala de conversa.
      *
-     * @param salaId O identificador único da sala de conversa.
      * @param msg A mensagem a ser salva.
      * @param chat O objeto de transferência de dados da conversa.
      * @return Um [Result] indicando sucesso ou falha.
@@ -83,9 +82,8 @@ class ChatRepository(
         val res = chatRemote.save(chat.id, msg, chat)
 
         if (res.isFailure) {
-            Log.e("ChatRepository", "Erro ao salvar msg: ${res.exceptionOrNull()}")
-            if (previousMsg != null) chatDao.insertMsg(previousMsg)
-            else chatDao.deleteMsgById(msg.id)
+            Log.e("ChatRepository", "insertMsg: ${res.exceptionOrNull()}")
+            if (previousMsg == null) chatDao.deleteMsgById(msg.id)
         }
 
         return res
@@ -95,7 +93,6 @@ class ChatRepository(
      * Atualiza uma mensagem pelo seu ID em uma sala de conversa.
      *
      * @param id O identificador único da sala de conversa.
-     * @param msgId O identificador único da mensagem.
      * @param msg O conteúdo atualizado da mensagem.
      * @return Um [Result] indicando sucesso ou falha.
      */
@@ -106,9 +103,8 @@ class ChatRepository(
         val res = chatRemote.updateMsgById(id, msg.id, msg)
 
         if (res.isFailure) {
-            Log.e("ChatRepository", "Erro ao atualizar msg: ${res.exceptionOrNull()}")
+            Log.e("ChatRepository", "updateMsg: ${res.exceptionOrNull()}")
             if (previousMsg != null) chatDao.insertMsg(previousMsg)
-            else chatDao.deleteMsgById(msg.id)
         }
 
         return res
@@ -122,16 +118,15 @@ class ChatRepository(
      * @param read O estado de leitura da mensagem.
      * @return Um [Result] indicando sucesso ou falha.
      */
-    suspend fun updateMsgsRead(id: String, uid: String, read: Boolean): Result<Boolean> {
+    suspend fun updateMsgsRead(id: String, msgIds: List<String>, read: Boolean): Result<Boolean> {
         val previousChat = chatDao.getMsgsById(id).firstOrNull()
 
-        chatDao.updateReadById(id, uid, read)
-        val res = chatRemote.updateMsgsReadById(id, uid)
+        chatDao.updateReadByIds(msgIds, read)
+        val res = chatRemote.updateMsgsReadByIds(id, msgIds, read)
 
         if (res.isFailure) {
-            Log.e("ChatRepository", "Erro ao atualizar msgs: ${res.exceptionOrNull()}")
+            Log.e("ChatRepository", "updateMsgsRead: ${res.exceptionOrNull()}")
             if (previousChat != null) chatDao.insertMsgs(previousChat)
-            else chatDao.deleteChat(id)
         }
 
         return res
@@ -151,9 +146,8 @@ class ChatRepository(
         val res = chatRemote.deleteMsgById(id, msgId)
 
         if (res.isFailure) {
-            Log.e("ChatRepository", "Erro ao deletar msg: ${res.exceptionOrNull()}")
+            Log.e("ChatRepository", "deleteMsg: ${res.exceptionOrNull()}")
             if (previousMsg != null) chatDao.insertMsg(previousMsg)
-            else chatDao.deleteMsgById(msgId)
         }
 
         return res
@@ -169,13 +163,12 @@ class ChatRepository(
     suspend fun deleteChat(id: String, uid: String): Result<Boolean> {
         val previousChat = chatDao.getChatById(id)
 
-        chatDao.deleteChat(id)
+        chatDao.deleteChatById(id)
         val res = chatRemote.hideChat(id, uid)
 
         if (res.isFailure) {
-            Log.e("ChatRepository", "Erro ao ocultar chat: ${res.exceptionOrNull()}")
-            if (previousChat != null) chatDao.insertChat(previousChat)
-            else chatDao.deleteChat(id)
+            Log.e("ChatRepository", "deleteChat: ${res.exceptionOrNull()}")
+            if (previousChat != null) chatDao.insertChat(previousChat.chat)
         }
 
         return res

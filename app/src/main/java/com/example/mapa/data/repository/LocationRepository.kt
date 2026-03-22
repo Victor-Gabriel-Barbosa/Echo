@@ -34,14 +34,14 @@ class LocationRepository(
     fun getLocations(): Flow<List<LocationDTO>> = channelFlow {
         launch {
             locationDao.getAll()
-                .map { lista -> lista.map { it.toDTO() } }
+                .map { list -> list.map { it.toDTO() } }
                 .collectLatest { send(it) }
         }
 
         launch {
             locationRemote.getAll()
-                .catch { e -> Log.e("LocalRepository", "Erro sync locais: $e") }
-                .collect { lista -> locationDao.insertAll(lista.map { it.toEntity() }) }
+                .catch { e -> Log.e("LocalRepository", "getLocations: $e") }
+                .collect { list -> locationDao.syncAll(list.map { it.toEntity() }) }
         }
     }
 
@@ -57,14 +57,14 @@ class LocationRepository(
     fun getLocationsUser(uid: String): Flow<List<LocationDTO>> = channelFlow {
         launch {
             locationDao.getByUid(uid)
-                .map { lista -> lista.map { it.toDTO() } }
+                .map { list -> list.map { it.toDTO() } }
                 .collectLatest { send(it) }
         }
 
         launch {
             locationRemote.getByUid(uid)
-                .catch { e -> Log.e("LocalRepository", "Erro sync locais: $e") }
-                .collect { lista -> locationDao.insertAll(lista.map { it.toEntity() }) }
+                .catch { e -> Log.e("LocalRepository", "getLocationsUser: $e") }
+                .collect { list -> locationDao.syncByUid(uid, list.map { it.toEntity() }) }
         }
     }
 
@@ -76,11 +76,9 @@ class LocationRepository(
      */
     suspend fun getLocationById(id: String): LocationDTO? {
         return try {
-            val localSalvo = locationDao.getById(id).firstOrNull()
-
-            localSalvo?.toDTO()
+            locationDao.getById(id)?.toDTO()
         } catch (e: Exception) {
-            Log.e("LocationRepository", "Erro ao buscar local pelo ID: ${e.message}")
+            Log.e("LocationRepository", "getLocationById: ${e.message}")
             null
         }
     }
@@ -92,15 +90,14 @@ class LocationRepository(
      * @return Um [Result] indicando sucesso ou falha.
      */
     suspend fun insertLocation(local: LocationDTO): Result<Boolean> {
-        val previousLocation = locationDao.getById(local.id).firstOrNull()
+        val previousLocation = locationDao.getById(local.id)
 
         locationDao.insert(local.toEntity())
         val res = locationRemote.save(local)
 
         if (res.isFailure) {
-            Log.e("LocalRepository", "Erro ao salvar remoto: ${res.exceptionOrNull()}")
-            if (previousLocation != null) locationDao.insert(previousLocation)
-            else locationDao.deleteById(local.id)
+            Log.e("LocalRepository", "insertLocation: ${res.exceptionOrNull()}")
+            if (previousLocation == null) locationDao.deleteById(local.id)
         }
 
         return res
@@ -113,15 +110,14 @@ class LocationRepository(
      * @return Um [Result] indicando sucesso ou falha da operação remota.
      */
     suspend fun deleteLocation(id: String): Result<Boolean> {
-        val previousLocation = locationDao.getById(id).firstOrNull()
+        val previousLocation = locationDao.getById(id)
 
         locationDao.deleteById(id)
         val res = locationRemote.deleteById(id)
 
         if (res.isFailure) {
-            Log.e("LocalRepository", "Erro ao deletar remoto. Restaurando local.")
+            Log.e("LocalRepository", "deleteLocation: ${res.exceptionOrNull()}")
             if (previousLocation != null) locationDao.insert(previousLocation)
-            else locationDao.deleteById(id)
         }
 
         return res
@@ -134,15 +130,14 @@ class LocationRepository(
      * @return Um [Result] indicando sucesso ou falha da operação remota.
      */
     suspend fun updateLocation(local: LocationDTO): Result<Boolean> {
-        val previousLocation = locationDao.getById(local.id).firstOrNull()
+        val previousLocation = locationDao.getById(local.id)
 
         locationDao.insert(local.toEntity())
         val res = locationRemote.updateById(local.id, local)
 
         if (res.isFailure) {
-            Log.e("LocalRepository", "Erro ao atualizar remoto: ${res.exceptionOrNull()}")
+            Log.e("LocalRepository", "updateLocation: ${res.exceptionOrNull()}")
             if (previousLocation != null) locationDao.insert(previousLocation)
-            else locationDao.deleteById(local.id)
         }
 
         return res

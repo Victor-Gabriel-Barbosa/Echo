@@ -89,15 +89,11 @@ class ChatListViewModel(
      * o status de carregamento e quaisquer erros que possam ter ocorrido.
      */
     val uiState: StateFlow<ChatListUiState> = chatItems
-        .map { chats ->
-            ChatListUiState(chats = chats.sortedByDescending { it.chat.lastTimestamp }, loading = false, error = null)
-        }
-        .onStart {
-            emit(ChatListUiState(loading = true))
-        }
+        .map { chats -> ChatListUiState(chats = chats.sortedByDescending { it.chat.lastTimestamp }, loading = false, error = null) }
+        .onStart { emit(ChatListUiState(loading = true)) }
         .catch { e ->
             Log.e("ChatListViewModel", "uiState: ${e.message}")
-            emit(ChatListUiState(loading = false, error = e.message ?: "Erro desconhecido"))
+            emit(ChatListUiState(loading = false, error = "${e.message}"))
         }
         .stateIn(
             scope = viewModelScope,
@@ -139,7 +135,7 @@ class ChatListViewModel(
                         try {
                             userRepo.syncUser(contactUid)
                         } catch (e: Exception) {
-                            Log.e("ChatListViewModel", "Erro sync contato: ${e.message}")
+                            Log.e("ChatListViewModel", "chatItemFlow: ${e.message}")
                         }
                     }
                 }
@@ -163,7 +159,7 @@ class ChatListViewModel(
         viewModelScope.launch {
             ids.forEach { id ->
                 chatRepo.deleteChat(id, uid)
-                    .onFailure { e -> Log.e("ChatListViewModel", "Erro ao ocultar: ${e.message}") }
+                    .onFailure { e -> Log.e("ChatListViewModel", "deleteMsg: ${e.message}") }
             }
         }
     }

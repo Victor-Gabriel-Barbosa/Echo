@@ -17,7 +17,7 @@ import com.example.mapa.data.local.entity.UserEntity
         ChatEntity::class,
         MsgEntity::class
     ],
-    version = 5,
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

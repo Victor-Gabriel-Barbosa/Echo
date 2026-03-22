@@ -1,4 +1,4 @@
-package com.example.mapa.ui.components
+package com.example.mapa.ui.component
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button

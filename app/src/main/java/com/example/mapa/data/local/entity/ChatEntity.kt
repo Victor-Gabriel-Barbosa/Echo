@@ -12,9 +12,6 @@ data class ChatEntity(
     val lastTimestamp: Long,
     val participants: String,
     val visibleTo: String,
-    val lastMsgUid: String?,
-    val lastMsgText: String?,
-    val lastMsgTimestamp: Long?,
-    val lastMsgRead: Boolean?,
+    val lastMsgId: String?,
     val locationId: String
 )

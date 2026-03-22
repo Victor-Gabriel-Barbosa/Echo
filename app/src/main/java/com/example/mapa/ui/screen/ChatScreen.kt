@@ -65,6 +65,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,12 +84,12 @@ import com.example.mapa.R
 import com.example.mapa.data.remote.dto.MsgDTO
 import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.model.ChatUiState
-import com.example.mapa.ui.components.LoadingAnimation
-import com.example.mapa.ui.components.AsyncImg
-import com.example.mapa.ui.components.BubbleMsg
-import com.example.mapa.ui.components.CarouselImg
-import com.example.mapa.ui.components.ReviewDialog
-import com.example.mapa.ui.components.LoadingOverlay
+import com.example.mapa.ui.component.LoadingAnimation
+import com.example.mapa.ui.component.AsyncImg
+import com.example.mapa.ui.component.BubbleMsg
+import com.example.mapa.ui.component.CarouselImg
+import com.example.mapa.ui.component.ReviewDialog
+import com.example.mapa.ui.component.LoadingOverlay
 import com.example.mapa.ui.theme.MapaTheme
 import com.example.mapa.util.createPhotoUri
 import com.example.mapa.viewmodels.ChatViewModel
@@ -126,6 +127,7 @@ fun ChatScreen(
         onEditMsg = chatViewModel::updateMsg,
         onDeleteMsg = chatViewModel::deleteMsg,
         onReview = chatViewModel::rateUser,
+        onMsgsVisible = chatViewModel::markMsgsAsRead,
         modifier = modifier
     )
 }
@@ -139,6 +141,7 @@ fun ChatScreenContent(
     onEditMsg: (MsgDTO) -> Unit,
     onDeleteMsg: (String) -> Unit,
     onReview: (Double) -> Unit,
+    onMsgsVisible: (List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
@@ -155,6 +158,15 @@ fun ChatScreenContent(
     // Mostra o diálogo de avaliação
     var showReviewDialog by rememberSaveable { mutableStateOf(false) }
     val rated = chatUiState.contact?.reviewerUids?.contains(chatUiState.uid) == true
+
+    // Atualiza a lista de mensagens visíveis
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo }
+            .collect { visibleItems ->
+                val visibleMsgIds = visibleItems.mapNotNull { it.key as? String }
+                if (visibleMsgIds.isNotEmpty()) onMsgsVisible(visibleMsgIds)
+            }
+    }
 
     // Scroll automático para a última mensagem ao entrar ou receber nova msg
     LaunchedEffect(chatUiState.msgs.size) {
@@ -317,9 +329,7 @@ fun ChatScreenContent(
                             SmallFloatingActionButton(
                                 onClick = {
                                     scope.launch {
-                                        if (chatUiState.msgs.isNotEmpty()) listState.animateScrollToItem(
-                                            chatUiState.msgs.lastIndex
-                                        )
+                                        if (chatUiState.msgs.isNotEmpty()) listState.animateScrollToItem(chatUiState.msgs.lastIndex)
                                     }
                                 },
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -335,7 +345,7 @@ fun ChatScreenContent(
                     }
                 }
 
-                ChatEntrada(
+                ChatInput(
                     loading = chatUiState.loading,
                     onSendMsg = onSendMsg
                 )
@@ -347,7 +357,7 @@ fun ChatScreenContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatEntrada(
+fun ChatInput(
     loading: Boolean,
     onSendMsg: (MsgDTO) -> Unit
 ) {
@@ -357,6 +367,8 @@ fun ChatEntrada(
     var text by rememberSaveable { mutableStateOf("") }
     var imgUrls by rememberSaveable { mutableStateOf(listOf<String>()) }
     var uriTemp by rememberSaveable { mutableStateOf<Uri?>(null) }
+
+    // Launcher para selecionar imagens da galeria
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
         onResult = { uris -> imgUrls = imgUrls + uris.map { it.toString() } }
@@ -374,7 +386,7 @@ fun ChatEntrada(
     ) {
         CarouselImg(
             imgUrls = imgUrls,
-            onRemoverImg = { imgUrls = imgUrls - it },
+            onRemoveImg = { imgUrls = imgUrls - it },
             modifier = Modifier.padding(8.dp)
         )
 
@@ -408,13 +420,11 @@ fun ChatEntrada(
                             },
                             state = rememberTooltipState()
                         ) {
-                            IconButton(onClick = {
-                                photoPicker.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
-                                )
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Outlined.AttachFile,
                                     contentDescription = stringResource(R.string.adicionar_imagem)
@@ -512,26 +522,29 @@ fun ChatScreenContentPreview() {
             timestamp = System.currentTimeMillis()
         )
 
-        ChatScreenContent(
-            modifier = Modifier.padding(top = 8.dp),
-            chatUiState = ChatUiState(
-                msgs = List(16) { msg.copy(id = "${it + 1}") },
-                contact = UserDTO(
-                    uid = "456",
-                    name = "João da Silva Medeiros",
-                    email = "james.francis.byrnes@example-pet-store.com",
-                    photo = "https://img.freepik.com/vetores-gratis/ilustracao-do-jovem-sorridente_1308-174669.jpg",
-                    averageRating = 4.5,
-                    ratingCount = 10,
-                    reviewerUids = listOf("456")
+        Scaffold { innerPadding ->
+            ChatScreenContent(
+                modifier = Modifier.padding(innerPadding),
+                chatUiState = ChatUiState(
+                    msgs = List(16) { msg.copy(id = "${it + 1}") },
+                    contact = UserDTO(
+                        uid = "456",
+                        name = "João da Silva Medeiros",
+                        email = "james.francis.byrnes@example-pet-store.com",
+                        photo = "https://img.freepik.com/vetores-gratis/ilustracao-do-jovem-sorridente_1308-174669.jpg",
+                        averageRating = 4.5,
+                        ratingCount = 10,
+                        reviewerUids = listOf("456")
+                    ),
+                    loading = false
                 ),
-                loading = false
-            ),
-            onBack = {},
-            onSendMsg = {},
-            onEditMsg = {},
-            onDeleteMsg = {},
-            onReview = {}
-        )
+                onBack = {},
+                onSendMsg = {},
+                onEditMsg = {},
+                onDeleteMsg = {},
+                onReview = {},
+                onMsgsVisible = {}
+            )
+        }
     }
 }

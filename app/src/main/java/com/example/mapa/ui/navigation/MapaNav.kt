@@ -33,10 +33,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.example.mapa.R
-import com.example.mapa.data.remote.dto.UserDTO
-import com.example.mapa.ui.components.AsyncImg
-import com.example.mapa.ui.screen.ChatScreen
+import com.example.mapa.ui.component.AsyncImg
 import com.example.mapa.ui.screen.ChatListScreen
+import com.example.mapa.ui.screen.ChatScreen
 import com.example.mapa.ui.screen.HomeScreen
 import com.example.mapa.ui.screen.ProfileScreen
 import com.example.mapa.ui.screen.SavedScreen
@@ -47,7 +46,8 @@ import org.koin.androidx.compose.koinViewModel
 /**
  * Composable principal que configura a estrutura de navegação do aplicativo.
  *
- * @param userUiState O objeto [UserDTO] do usuário atualmente logado. Nulo se não houver usuário logado.
+ * @param authViewModel O ViewModel para gerenciar a autenticação do usuário.
+ * @param chatListViewModel O ViewModel para gerenciar a lista de conversas.
  */
 @Composable
 fun MapaNav(
@@ -89,7 +89,7 @@ fun MapaNav(
     NavigationSuiteScaffold(
         layoutType = if (destination is Routes.Chat) NavigationSuiteType.None else NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
         navigationSuiteItems = {
-            AppRotas.entries.forEach { item ->
+            AppRoutes.entries.forEach { item ->
                 // Verifica se o item está selecionado
                 val selected = when (item.route) {
                     Routes.ChatRoutes -> destination == Routes.ChatRoutes || destination == Routes.ChatList || destination is Routes.Chat
@@ -111,9 +111,10 @@ fun MapaNav(
                             }
                         }
                     },
+
                     icon = {
                         when (item) {
-                            AppRotas.PROFILE if userUiState.user?.photo != null -> {
+                            AppRoutes.PROFILE if userUiState.user?.photo != null -> {
                                 AsyncImg(
                                     model = userUiState.user?.photo,
                                     contentDescription = stringResource(R.string.foto_de_perfil),
@@ -128,7 +129,7 @@ fun MapaNav(
                                 )
                             }
 
-                            AppRotas.CHAT if unreadCount > 0 -> {
+                            AppRoutes.CHAT if unreadCount > 0 -> {
                                 BadgedBox(
                                     badge = {
                                         Badge(containerColor = MaterialTheme.colorScheme.error) {
@@ -138,7 +139,8 @@ fun MapaNav(
                                 ) {
                                     Icon(
                                         imageVector = if (selected) item.iconFill else item.icon,
-                                        contentDescription = stringResource(item.label)
+                                        contentDescription = stringResource(item.label),
+                                        tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -146,7 +148,8 @@ fun MapaNav(
                             else -> {
                                 Icon(
                                     imageVector = if (selected) item.iconFill else item.icon,
-                                    contentDescription = stringResource(item.label)
+                                    contentDescription = stringResource(item.label),
+                                    tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -155,6 +158,7 @@ fun MapaNav(
                         Text(
                             text = stringResource(item.label),
                             style = MaterialTheme.typography.labelSmall,
+                            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -168,41 +172,41 @@ fun MapaNav(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
                 modifier = Modifier.padding(innerPadding)
-            ) { rota ->
-                when (rota) {
-                    Routes.Home -> NavEntry(rota) {
+            ) { route ->
+                when (route) {
+                    Routes.Home -> NavEntry(route) {
                         HomeScreen(
                             user = userUiState.user,
-                            onChat = { uid, localId -> backStack.add(Routes.Chat(uid, localId)) }
+                            onChat = { uid, locationId -> backStack.add(Routes.Chat(uid, locationId)) }
                         )
                     }
 
-                    Routes.Saved -> NavEntry(rota) {
+                    Routes.Saved -> NavEntry(route) {
                         SavedScreen()
                     }
 
-                    Routes.ChatRoutes, Routes.ChatList -> NavEntry(rota) {
+                    Routes.ChatRoutes, Routes.ChatList -> NavEntry(route) {
                         ChatListScreen(
                             onChat = { uid, localId -> backStack.add(Routes.Chat(uid, localId)) },
                             chatListViewModel = chatListViewModel
                         )
                     }
 
-                    is Routes.Chat -> NavEntry(rota) {
+                    is Routes.Chat -> NavEntry(route) {
                         ChatScreen(
-                            uid = rota.uid,
-                            locationId = rota.localId,
+                            uid = route.uid,
+                            locationId = route.localId,
                             onBack = { backStack.removeLastOrNull() }
                         )
                     }
 
-                    Routes.Profile -> NavEntry(rota) {
+                    Routes.Profile -> NavEntry(route) {
                         ProfileScreen(
                             authViewModel = authViewModel
                         )
                     }
 
-                    else -> error("Rota não encontrada: $rota")
+                    else -> error("Rota não encontrada: $route")
                 }
             }
         }

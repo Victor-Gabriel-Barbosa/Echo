@@ -67,3 +67,4 @@ obj/
 
 # Exclude Gradle wrapper jar if already tracked
 !gradle/wrapper/gradle-wrapper.jar
+.fake

@@ -86,9 +86,10 @@ class AuthViewModel(
                 .onSuccess {
                     val user = authRemote.user.first()
                     if (user != null) userRepo.syncUserAuth(user.copy(email = email))
+
                     _loginUiState.value = LoginUiState.Success
                 }
-                .onFailure { e -> _loginUiState.value = LoginUiState.Error(e.message ?: "Erro no login") }
+                .onFailure { e -> _loginUiState.value = LoginUiState.Error("${e.message}") }
         }
     }
 
@@ -111,9 +112,7 @@ class AuthViewModel(
 
                     _loginUiState.value = LoginUiState.Success
                 }
-                .onFailure { error ->
-                    _loginUiState.value = LoginUiState.Error(error.message ?: "Erro no cadastro")
-                }
+                .onFailure { e -> _loginUiState.value = LoginUiState.Error("${e.message}") }
         }
     }
 
@@ -135,9 +134,7 @@ class AuthViewModel(
 
                     _loginUiState.value = LoginUiState.Success
                 }
-                .onFailure { error ->
-                    _loginUiState.value = LoginUiState.Error(error.message ?: "Erro no login com Google")
-                }
+                .onFailure { e -> _loginUiState.value = LoginUiState.Error("${e.message}") }
         }
     }
 

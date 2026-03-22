@@ -3,6 +3,7 @@ package com.example.mapa.ui.screen
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -34,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -49,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,14 +60,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mapa.R
 import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.model.UserUiState
-import com.example.mapa.ui.components.LoadingAnimation
-import com.example.mapa.ui.components.AsyncImg
-import com.example.mapa.ui.components.ConfirmDialog
-import com.example.mapa.ui.components.EditDialog
-import com.example.mapa.ui.components.Header
+import com.example.mapa.ui.component.LoadingAnimation
+import com.example.mapa.ui.component.AsyncImg
+import com.example.mapa.ui.component.ConfirmDialog
+import com.example.mapa.ui.component.EditDialog
+import com.example.mapa.ui.component.Header
 import com.example.mapa.ui.theme.MapaTheme
 import com.example.mapa.viewmodels.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 
 @Composable
 fun ProfileScreen(
@@ -74,7 +81,7 @@ fun ProfileScreen(
     val context = LocalContext.current
 
     // Observáveis do ViewModel
-    val usuarioUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+    val userUiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
     // Feedback visual (eventos) vindo do ViewModel
     LaunchedEffect(Unit) {
@@ -97,7 +104,7 @@ fun ProfileScreen(
         onEditPhoto = authViewModel::updatePhoto,
         onEditName = authViewModel::updateName,
         onOpenSettings = openAppSettings,
-        userUiState = usuarioUiState,
+        userUiState = userUiState,
         modifier = modifier
     )
 }
@@ -116,11 +123,42 @@ fun ProfileScreenContent(
     var showEditDialog by rememberSaveable { mutableStateOf(false) }
     var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
 
+    // Launcher de seleção e recorte de imagem
+    val cropImageLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            val croppedUri = result.uriContent
+            if (croppedUri != null) onEditPhoto(croppedUri.toString())
+        } else Log.e("ProfileScreen", "ProfileScreenContent: ${result.error}")
+    }
+
+    // Cores para o CropImage
+    val backgroundColor = MaterialTheme.colorScheme.background.toArgb()
+    val primaryColor = MaterialTheme.colorScheme.primary.toArgb()
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary.toArgb()
+
     // Launcher de seleção de imagem
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            if (uri != null) onEditPhoto(uri.toString())
+            if (uri != null) {
+                val cropOptions = CropImageContractOptions(
+                    uri = uri,
+                    cropImageOptions = CropImageOptions(
+                        activityBackgroundColor = backgroundColor,
+                        toolbarColor = primaryColor,
+                        toolbarBackButtonColor = onPrimaryColor,
+                        activityMenuIconColor = onPrimaryColor,
+                        guidelines = CropImageView.Guidelines.ON,
+                        aspectRatioX = 1,
+                        aspectRatioY = 1,
+                        fixAspectRatio = true,
+                        cropShape = CropImageView.CropShape.OVAL,
+                        imageSourceIncludeGallery = false,
+                        imageSourceIncludeCamera = false
+                    )
+                )
+                cropImageLauncher.launch(cropOptions)
+            }
         }
     )
 
@@ -249,7 +287,7 @@ fun ProfileScreenContent(
             // Badge de avaliação
             Surface(
                 shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = MaterialTheme.colorScheme.primary
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -259,7 +297,7 @@ fun ProfileScreenContent(
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(16.dp)
                     )
 
@@ -268,7 +306,7 @@ fun ProfileScreenContent(
                     Text(
                         text = "${userUiState.user?.averageRating ?: 0.0}",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.padding(start = 6.dp)
                     )
                 }
@@ -327,22 +365,25 @@ fun ProfileScreenContent(
 @Composable
 fun ProfileScreenContentPreview() {
     MapaTheme {
-        ProfileScreenContent(
-            userUiState = UserUiState(
-                UserDTO (
-                    uid = "123",
-                    name = "João da Silva",
-                    email = "joaosilva@example.com",
-                    photo = "https://cdn-icons-png.flaticon.com/512/12225/12225881.png"
+        Scaffold { innerPadding ->
+            ProfileScreenContent(
+                modifier = Modifier.padding(innerPadding),
+                userUiState = UserUiState(
+                    UserDTO(
+                        uid = "123",
+                        name = "João da Silva",
+                        email = "joaosilva@example.com",
+                        photo = "https://cdn-icons-png.flaticon.com/512/12225/12225881.png"
+                    ),
+                    loggedIn = true,
+                    loadingPhoto = false,
+                    loadingName = false
                 ),
-                loggedIn = true,
-                loadingPhoto = false,
-                loadingName = false
-            ),
-            onLogout = {},
-            onEditPhoto = {},
-            onEditName = {},
-            onOpenSettings = {}
-        )
+                onLogout = {},
+                onEditPhoto = {},
+                onEditName = {},
+                onOpenSettings = {}
+            )
+        }
     }
 }

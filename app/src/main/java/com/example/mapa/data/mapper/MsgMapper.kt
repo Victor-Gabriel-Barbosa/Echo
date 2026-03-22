@@ -3,14 +3,15 @@ package com.example.mapa.data.mapper
 import com.example.mapa.data.local.entity.MsgEntity
 import com.example.mapa.data.remote.dto.MsgDTO
 
-fun MsgDTO.toEntity(salaId: String): MsgEntity {
+fun MsgDTO.toEntity(chatId: String): MsgEntity {
     return MsgEntity(
         id = this.id,
-        chatId = salaId,
+        chatId = chatId,
         uid = this.uid,
         text = this.text,
         timestamp = this.timestamp,
         read = this.read,
+        edited = this.edited,
         imgUrls = this.imgUrls.joinToString(separator = "|")
     )
 }
@@ -22,6 +23,7 @@ fun MsgEntity.toDTO(): MsgDTO {
         text = this.text,
         timestamp = this.timestamp,
         read = this.read,
+        edited = this.edited,
         imgUrls = if (this.imgUrls.isBlank()) emptyList() else this.imgUrls.split("|")
     )
 }

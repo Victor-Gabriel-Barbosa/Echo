@@ -1,7 +1,6 @@
 package com.example.mapa.ui.navigation
 
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,7 +21,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.example.mapa.R
 import com.example.mapa.model.LoginUiState
-import com.example.mapa.ui.components.LottieAnimation
+import com.example.mapa.ui.component.LottieAnimation
 import com.example.mapa.ui.screen.SignInScreen
 import com.example.mapa.ui.screen.SignUpScreen
 import com.example.mapa.viewmodels.AuthViewModel

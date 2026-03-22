@@ -6,7 +6,7 @@ import androidx.room.Relation
 /**
  * Classe agregadora para buscar o Chat e sua última mensagem correspondente.
  */
-data class ChatWithLastMsg(
+data class ChatLastMsg(
     @Embedded val chat: ChatEntity,
     @Relation(
         parentColumn = "lastMsgId",

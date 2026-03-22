@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.example.mapa.data.local.entity.LocationEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -17,13 +18,25 @@ interface LocationDao {
     @Query("SELECT * FROM location WHERE uid = :uid")
     fun getByUid(uid: String): Flow<List<LocationEntity>>
     @Query("SELECT * FROM location WHERE id = :id")
-    suspend fun getById(id: String): List<LocationEntity>
+    suspend fun getById(id: String): LocationEntity?
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(location: LocationEntity)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(locations: List<LocationEntity>)
     @Query("DELETE FROM location WHERE id = :id")
     suspend fun deleteById(id: String)
+    @Query("DELETE FROM location WHERE uid = :uid")
+    suspend fun clearByUid(uid: String)
     @Query("DELETE FROM location")
     suspend fun clearAll()
+    @Transaction
+    suspend fun syncByUid(uid: String, locations: List<LocationEntity>) {
+        clearByUid(uid)
+        insertAll(locations)
+    }
+    @Transaction
+    suspend fun syncAll(locations: List<LocationEntity>) {
+        clearAll()
+        insertAll(locations)
+    }
 }

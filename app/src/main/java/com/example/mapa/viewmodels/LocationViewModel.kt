@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -47,15 +48,30 @@ class LocationViewModel(
      * Fluxo de todos os locais.
      */
     private val locationFlow = locationRepo.getLocations()
+        .shareIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            replay = 1
+        )
+
+    /**
+     * Fluxo do usuário autenticado.
+     */
+    private val sharedUserFlow = authRemote.user
+        .shareIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            replay = 1
+        )
 
     /**
      * Fluxo de locais do usuário.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val locationUserFlow = authRemote.user
-        .flatMapLatest { usuario ->
-            if (usuario?.uid.isNullOrBlank()) flowOf(emptyList())
-            else locationRepo.getLocationsUser(usuario.uid)
+    private val locationUserFlow = sharedUserFlow
+        .flatMapLatest { user ->
+            if (user?.uid.isNullOrBlank()) flowOf(emptyList())
+            else locationRepo.getLocationsUser(user.uid)
         }
 
     /**
@@ -65,11 +81,11 @@ class LocationViewModel(
         locationFlow,
         locationUserFlow,
         _loading
-    ) { locais, locaisUsuario, carregando ->
+    ) { locations, userLocations, loading ->
         LocationUiState(
-            locations = locais,
-            locationsUser = locaisUsuario,
-            loading = carregando
+            locations = locations,
+            locationsUser = userLocations,
+            loading = loading
         )
     }.stateIn(
         scope = viewModelScope,
@@ -80,11 +96,10 @@ class LocationViewModel(
     init {
         // Observa mudanças nos locais e atualiza os geofences automaticamente
         viewModelScope.launch {
-            combine(locationFlow, authRemote.user) { locations, user ->
+            combine(locationFlow, sharedUserFlow) { locations, user ->
                 Pair(locations, user?.uid)
             }.collectLatest { (locations, uid) ->
                 if (uid != null && locations.isNotEmpty()) {
-                    // Atualiza o OS com os geofences ativos
                     try {
                         geofenceManager.setupGeofences(locations, uid)
                     } catch (e: SecurityException) {

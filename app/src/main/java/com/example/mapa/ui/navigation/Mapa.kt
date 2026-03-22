@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mapa.model.LoginUiState
-import com.example.mapa.ui.components.LoadingOverlay
+import com.example.mapa.ui.component.LoadingOverlay
 import com.example.mapa.viewmodels.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
 

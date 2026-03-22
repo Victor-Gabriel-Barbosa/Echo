@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -37,11 +38,11 @@ import com.example.mapa.data.remote.dto.LocationDTO
 import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.model.LocationUiState
 import com.example.mapa.model.SheetUiState
-import com.example.mapa.ui.components.DeleteDialog
-import com.example.mapa.ui.components.LocationForm
-import com.example.mapa.ui.components.LoadingOverlay
-import com.example.mapa.ui.components.Header
-import com.example.mapa.ui.components.LocationDetails
+import com.example.mapa.ui.component.DeleteDialog
+import com.example.mapa.ui.component.LocationForm
+import com.example.mapa.ui.component.LoadingOverlay
+import com.example.mapa.ui.component.Header
+import com.example.mapa.ui.component.LocationDetails
 import com.example.mapa.ui.theme.MapaTheme
 import com.example.mapa.util.ReqPermissions
 import com.example.mapa.viewmodels.LocationViewModel
@@ -186,7 +187,7 @@ fun HomeScreenContent(
         sheetContentColor = MaterialTheme.colorScheme.onSurface,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         sheetShadowElevation = 8.dp,
-        sheetTonalElevation = 2.dp,
+        sheetTonalElevation = 0.dp,
         modifier = modifier,
         sheetDragHandle = {
             Box(
@@ -310,6 +311,7 @@ fun HomeScreenContent(
                         title = stringResource(R.string.local_marcado),
                         icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
                     )
+
                     Circle(
                         center = estado.latLng,
                         radius = estado.radius,
@@ -326,7 +328,7 @@ fun HomeScreenContent(
             Header(
                 title = stringResource(R.string.mapa),
                 icon = R.drawable.logo,
-                modifier = modifier.align(Alignment.TopCenter)
+                modifier = Modifier.align(Alignment.TopCenter)
             )
         }
     }
@@ -336,29 +338,32 @@ fun HomeScreenContent(
 @Composable
 fun HomeScreenContentPreview() {
     MapaTheme {
-        HomeScreenContent(
-            user = UserDTO(uid = "123", name = "Teste", email = "teste@email.com"),
-            locationUiState = LocationUiState(
-                locations = listOf(
-                    LocationDTO(
-                        id = "1",
-                        latitude = -23.550520,
-                        longitude = -46.633308,
-                        name = "Chave Perdida",
-                        description = "Perdi perto da praça",
-                        radius = 50.0
-                    )
+        Scaffold { innerPadding ->
+            HomeScreenContent(
+                modifier = Modifier.padding(innerPadding),
+                user = UserDTO(uid = "123", name = "Teste", email = "teste@email.com"),
+                locationUiState = LocationUiState(
+                    locations = listOf(
+                        LocationDTO(
+                            id = "1",
+                            latitude = -23.550520,
+                            longitude = -46.633308,
+                            name = "Chave Perdida",
+                            description = "Perdi perto da praça",
+                            radius = 50.0
+                        )
+                    ),
+                    loading = false
                 ),
-                loading = false
-            ),
-            cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(LatLng(-23.55, -46.63), 15f)
-            },
-            permsLocation = true,
-            onAddLocation = {},
-            onEditLocation = {},
-            onDeleteLocation = {},
-            onChat = { _, _ -> }
-        )
+                cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(LatLng(-23.55, -46.63), 15f)
+                },
+                permsLocation = true,
+                onAddLocation = {},
+                onEditLocation = {},
+                onDeleteLocation = {},
+                onChat = { _, _ -> }
+            )
+        }
     }
 }

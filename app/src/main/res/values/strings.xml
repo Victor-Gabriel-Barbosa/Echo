@@ -123,4 +123,8 @@
     <string name="configuracoes_do_app">Configurações do App</string>
     <string name="aviso_de_permissao">Aviso de Permissão</string>
     <string name="continuar">Continuar</string>
+    <string name="logo_do_aplicativo">Logo do aplicativo</string>
+    <string name="voce_tem_certeza_que_deseja_excluir_o_s_chat_s_selecionado_s">Você tem certeza que deseja excluir o(s) chat(s) selecionado(s)?</string>
+    <string name="excluir_chat_s">Excluir chat(s)?</string>
+    <string name="notificacoes">Notificações</string>
 </resources>

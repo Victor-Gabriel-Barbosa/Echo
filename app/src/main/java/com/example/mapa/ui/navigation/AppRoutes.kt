@@ -16,7 +16,7 @@ import com.example.mapa.R
 /**
  * Define todas as rotas do app e suas propriedades.
  */
-enum class AppRotas(
+enum class AppRoutes(
     val route: Routes,
     @get:StringRes val label: Int,
     val icon: ImageVector,

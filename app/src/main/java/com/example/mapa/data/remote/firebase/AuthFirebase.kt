@@ -1,8 +1,8 @@
 package com.example.mapa.data.remote.firebase
 
 import android.util.Log
-import com.example.mapa.data.remote.dto.UserDTO
 import com.example.mapa.data.remote.datasource.AuthRemote
+import com.example.mapa.data.remote.dto.UserDTO
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -10,7 +10,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
 /**
@@ -32,12 +31,6 @@ class AuthFirebase(
         auth.addAuthStateListener(authStateListener)
         awaitClose { auth.removeAuthStateListener(authStateListener) }
     }
-
-    /**
-     * Um [Flow] que emite `true` se houver um usuário logado e `false` caso contrário.
-     * Derivado do [user].
-     */
-    override val loggedInUser: Flow<Boolean?> = user.map { it != null }
 
     /**
      * Tenta autenticar um usuário com e-mail e senha.
@@ -84,7 +77,7 @@ class AuthFirebase(
             if (credential is AuthCredential) {
                 auth.signInWithCredential(credential).await()
                 Result.success(true)
-            } else Result.failure(IllegalArgumentException("Credencial inválida para Firebase"))
+            } else Result.failure(IllegalArgumentException("Credencial inválida"))
         } catch (e: Exception) {
             Log.e("AuthFirebaseRepo", "signInWithGoogle: ${e.message}")
             Result.failure(e)

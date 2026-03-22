@@ -136,20 +136,16 @@ class ChatFirebase(
      * @param uid O ID do usuário cujas mensagens não são o alvo (ou seja, o destinatário).
      * @return [Result.success] com `true` se a operação for bem-sucedida, [Result.failure] caso contrário.
      */
-    override suspend fun updateMsgsReadById(id: String, uid: String): Result<Boolean> {
+    override suspend fun updateMsgsReadByIds(id: String, msgIds: List<String>, read: Boolean): Result<Boolean> {
         return try {
+            if (msgIds.isEmpty()) return Result.success(true)
+
             val msgsRef = collection.document(id).collection("msgs")
-
-            val snapshot = msgsRef
-                .whereEqualTo("uid", uid)
-                .whereEqualTo("read", false)
-                .get()
-                .await()
-
-            if (snapshot.isEmpty) return Result.success(true)
-
             val batch = db.batch()
-            for (doc in snapshot.documents) batch.update(doc.reference, "read", true)
+
+            msgIds.forEach { msgId ->
+                batch.update(msgsRef.document(msgId), "read", read)
+            }
             batch.commit().await()
 
             Result.success(true)

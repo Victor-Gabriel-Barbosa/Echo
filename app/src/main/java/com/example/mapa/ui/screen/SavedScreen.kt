@@ -31,6 +31,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -57,18 +58,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.example.mapa.R
 import com.example.mapa.data.remote.dto.LocationDTO
 import com.example.mapa.model.SheetUiState
 import com.example.mapa.model.LocationUiState
-import com.example.mapa.ui.components.AsyncImg
-import com.example.mapa.ui.components.LottieAnimation
-import com.example.mapa.ui.components.SearchBar
-import com.example.mapa.ui.components.DeleteDialog
-import com.example.mapa.ui.components.LocationForm
-import com.example.mapa.ui.components.LoadingOverlay
-import com.example.mapa.ui.components.Header
+import com.example.mapa.ui.component.AsyncImg
+import com.example.mapa.ui.component.LottieAnimation
+import com.example.mapa.ui.component.SearchBar
+import com.example.mapa.ui.component.DeleteDialog
+import com.example.mapa.ui.component.LocationForm
+import com.example.mapa.ui.component.LoadingOverlay
+import com.example.mapa.ui.component.Header
 import com.example.mapa.ui.theme.MapaTheme
 import com.example.mapa.viewmodels.LocationViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -267,7 +267,7 @@ fun SavedScreenContent(
                 sheetState = modalSheetState,
                 containerColor = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                tonalElevation = 2.dp,
+                tonalElevation = 0.dp,
                 dragHandle = {
                     Box(
                         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
@@ -409,30 +409,33 @@ fun LocalItem(
 @Composable
 fun SavedScreenContentPreview() {
     MapaTheme {
-        SavedScreenContent(
-            locationUiState = LocationUiState(
-                locationsUser = listOf(
-                    LocationDTO(
-                        id = "1",
-                        latitude = -23.550520,
-                        longitude = -46.633308,
-                        name = "Chave Perdida",
-                        description = "Perdi perto da praça",
-                        radius = 50.0
+        Scaffold { innerPadding ->
+            SavedScreenContent(
+                modifier = Modifier.padding(innerPadding),
+                locationUiState = LocationUiState(
+                    locationsUser = listOf(
+                        LocationDTO(
+                            id = "1",
+                            latitude = -23.550520,
+                            longitude = -46.633308,
+                            name = "Chave Perdida",
+                            description = "Perdi perto da praça",
+                            radius = 50.0
+                        ),
+                        LocationDTO(
+                            id = "2",
+                            latitude = -23.550520,
+                            longitude = -46.633308,
+                            name = "Chave Perdida",
+                            description = "Perdi perto da praça",
+                            radius = 100.0
+                        )
                     ),
-                    LocationDTO(
-                        id = "2",
-                        latitude = -23.550520,
-                        longitude = -46.633308,
-                        name = "Chave Perdida",
-                        description = "Perdi perto da praça",
-                        radius = 100.0
-                    )
+                    loading = false
                 ),
-                loading = false
-            ),
-            onEditLocation = {},
-            onDeleteLocation = {},
-        )
+                onEditLocation = {},
+                onDeleteLocation = {},
+            )
+        }
     }
 }

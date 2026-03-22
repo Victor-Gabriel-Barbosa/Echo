@@ -121,9 +121,8 @@ class ChatViewModel(
      */
     private fun loadMsgsFlow(id: String): Flow<List<MsgDTO>> {
         return chatRepo.getMsgs(id)
-            .onEach { msgs -> markMsgsAsRead(id, msgs) }
             .catch { e ->
-                Log.e("ChatViewModel", "carregarMsgsFlow: ${e.message}")
+                Log.e("ChatViewModel", "loadMsgsFlow: ${e.message}")
                 _channel.send("Erro ao carregar mensagens: ${e.message}")
                 emit(emptyList())
             }
@@ -138,7 +137,7 @@ class ChatViewModel(
     private fun loadContactFlow(uid: String): Flow<UserDTO?> {
         return userRepo.getUser(uid)
             .catch {
-                Log.e("ChatViewModel", "carregarContatoFlow: ${it.message}")
+                Log.e("ChatViewModel", "loadContactFlow: ${it.message}")
                 emit(null)
             }
     }
@@ -152,12 +151,13 @@ class ChatViewModel(
         if (msg.text.isBlank() && msg.imgUrls.isEmpty()) return
 
         val authorUid = this@ChatViewModel.authorUid.value ?: return
-        val contact = _contactUid.value ?: return
-        val id = generateId(authorUid, contact)
+        val contactUid = _contactUid.value ?: return
+        val id = generateId(authorUid, contactUid)
         val locationId = _locationId.value ?: return
 
         val newMsg = msg.copy(
             id = UUID.randomUUID().toString(),
+            text = msg.text.trim(),
             uid = authorUid,
             timestamp = System.currentTimeMillis(),
             read = false
@@ -167,8 +167,8 @@ class ChatViewModel(
             id = id,
             lastMsg = newMsg,
             lastTimestamp = newMsg.timestamp,
-            participants = listOf(authorUid, contact),
-            visibleTo = listOf(authorUid, contact),
+            participants = listOf(authorUid, contactUid),
+            visibleTo = listOf(authorUid, contactUid),
             locationId = locationId
         )
 
@@ -176,7 +176,7 @@ class ChatViewModel(
             _loading.value = true
             chatRepo.insertMsg(newMsg, chatSummary)
                 .onFailure { e ->
-                    Log.e("ChatViewModel", "enviarMsg: ${e.message}")
+                    Log.e("ChatViewModel", "sendMsg: ${e.message}")
                     _channel.send("Falha ao enviar: ${e.message}")
                 }
             _loading.value = false
@@ -186,18 +186,18 @@ class ChatViewModel(
     /**
      * Edita uma mensagem existente.
      *
-     * @param novaMsg A nova mensagem.
+     * @param newMsg A nova mensagem.
      */
-    fun updateMsg(novaMsg: MsgDTO) {
+    fun updateMsg(newMsg: MsgDTO) {
         val myUid = authorUid.value ?: return
         val contactUid = _contactUid.value ?: return
         val id = generateId(myUid, contactUid)
 
         viewModelScope.launch {
             _loading.value = true
-            chatRepo.updateMsg(id, novaMsg)
+            chatRepo.updateMsg(id, newMsg.copy(edited = true, text = newMsg.text.trim()))
                 .onFailure { e ->
-                    Log.e("ChatViewModel", "editarMsg: ${e.message}")
+                    Log.e("ChatViewModel", "updateMsg: ${e.message}")
                     _channel.send("Falha ao atualizar: ${e.message}")
                 }
             _loading.value = false
@@ -218,7 +218,7 @@ class ChatViewModel(
             _loading.value = true
             chatRepo.deleteMsg(id, msgId)
                 .onFailure { e ->
-                    Log.e("ChatViewModel", "excluirMsg: ${e.message}")
+                    Log.e("ChatViewModel", "deleteMsg: ${e.message}")
                     _channel.send("Falha ao excluir: ${e.message}")
                 }
             _loading.value = false
@@ -231,16 +231,22 @@ class ChatViewModel(
      * @param id O ID da sala de chat.
      * @param msgs As mensagens a serem marcadas como lidas.
      */
-    private fun markMsgsAsRead(id: String, msgs: List<MsgDTO>) {
+    fun markMsgsAsRead(visibleMsgIds: List<String>, read: Boolean = true) {
         val contactUid = _contactUid.value ?: return
-        val update = msgs.any { it.uid == contactUid && !it.read }
+        val myUid = authorUid.value ?: return
+        val chatId = generateId(myUid, contactUid)
 
-        if (update) {
+        // Filtra para pegar apenas mensagens do contato que ainda não foram lidas e estão visíveis
+        val msgsToUpdate = uiState.value.msgs.filter { msg ->
+            msg.uid == contactUid && !msg.read && msg.id in visibleMsgIds
+        }.map { it.id }
+
+        if (msgsToUpdate.isNotEmpty()) {
             viewModelScope.launch {
-                chatRepo.updateMsgsRead(id, contactUid, true)
+                chatRepo.updateMsgsRead(chatId, msgsToUpdate, read)
                     .onFailure { e ->
-                        Log.e("ChatViewModel", "marcarMsgsComoLidas: ${e.message}")
-                        _channel.send("Falha ao marcar como lida: ${e.message}")
+                        Log.e("ChatViewModel", "markVisibleMsgsAsRead: ${e.message}")
+                        _channel.send("Falha ao marcar como lidas: ${e.message}")
                     }
             }
         }
@@ -249,16 +255,16 @@ class ChatViewModel(
     /**
      * Avalia o usuário.
      *
-     * @param nota A nota do usuário.
+     * @param rating A nota do usuário.
      */
-    fun rateUser(nota: Double) {
+    fun rateUser(rating: Double) {
         val myUid = authorUid.value ?: return
         val contact = uiState.value.contact ?: return
 
         viewModelScope.launch {
-            userRepo.updateUserRating(contact, myUid, nota)
+            userRepo.updateUserRating(contact, myUid, rating)
                 .onFailure { e ->
-                    Log.e("ChatViewModel", "avaliarUsuario: ${e.message}")
+                    Log.e("ChatViewModel", "rateUser: ${e.message}")
                     _channel.send("Falha ao avaliar: ${e.message}")
                 }
         }
