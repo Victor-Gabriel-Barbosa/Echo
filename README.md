@@ -9,7 +9,17 @@ Aplicativo Android para registro e compartilhamento de locais de **objetos perdi
 | Autenticação | Mapa (Home) | Salvos | Chat | Perfil |
 |:---:|:---:|:---:|:---:|:---:|
 | Login / Cadastro | Marcadores no mapa | Seus registros | Mensagens em tempo real | Avaliações e dados |
->![alt text](Screenshot_20260315_174331.png)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/dec3df32-12d2-4c2c-af70-54f982bd3600" width="250"/>
+  <img src="https://github.com/user-attachments/assets/d51ae404-179a-416b-848b-f8072d159266" width="250"/>
+  <img src="https://github.com/user-attachments/assets/68bd585c-4829-41d4-811d-ad59b65facd6" width="250"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/51d82bf5-1378-4228-9fa8-1fb99c7029c8" width="250"/>
+  <img src="https://github.com/user-attachments/assets/210b00be-302e-42ad-bdaf-049c8b31e470" width="250"/>
+</p>
 
 ---
 
