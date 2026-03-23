@@ -11,14 +11,22 @@ Aplicativo Android para registro e compartilhamento de locais de **objetos perdi
 | Login / Cadastro | Marcadores no mapa | Seus registros | Mensagens em tempo real | Avaliações e dados |
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/dec3df32-12d2-4c2c-af70-54f982bd3600" width="250"/>
-  <img src="https://github.com/user-attachments/assets/d51ae404-179a-416b-848b-f8072d159266" width="250"/>
-  <img src="https://github.com/user-attachments/assets/68bd585c-4829-41d4-811d-ad59b65facd6" width="250"/>
+  <img width="250" alt="Screenshot_20260322_210659" src="https://github.com/user-attachments/assets/a7c7429f-f15d-4916-8a06-8a01598b5637" />
+  <img width="250" alt="Screenshot_20260322_210754" src="https://github.com/user-attachments/assets/8992975e-ec30-4701-b2db-1d635ef37e1c" />
+  <img width="250" alt="Screenshot_20260322_210824" src="https://github.com/user-attachments/assets/7ab50c2b-18a9-4b1d-803a-db846c8cd6d5" />
+
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/51d82bf5-1378-4228-9fa8-1fb99c7029c8" width="250"/>
-  <img src="https://github.com/user-attachments/assets/210b00be-302e-42ad-bdaf-049c8b31e470" width="250"/>
+  <img width="250" alt="Screenshot_20260322_210855" src="https://github.com/user-attachments/assets/e603511c-4f0e-4c11-bcf5-f84496ff708c" />
+  <img width="250" alt="Screenshot_20260322_211349" src="https://github.com/user-attachments/assets/ef426694-d82f-4caa-b63b-56389ae0b23a" />
+  <img width="250" alt="Screenshot_20260322_211407" src="https://github.com/user-attachments/assets/9bcd11f4-01fc-4cf9-98b4-aa75fbb3b725" />
+</p>
+
+<p align="center">
+  <img width="250" alt="Screenshot_20260322_211519" src="https://github.com/user-attachments/assets/f79cd911-a20b-4538-bc71-710a2bd2a233" />
+  <img width="250" alt="Screenshot_20260322_211537" src="https://github.com/user-attachments/assets/fd009c9e-205d-45a7-99b8-b783d3b10552" />
+  <img width="250" alt="Screenshot_20260322_211621" src="https://github.com/user-attachments/assets/5ce7184a-6621-4452-8ff6-0f0550d448c4" />
 </p>
 
 ---
