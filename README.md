@@ -53,7 +53,7 @@ app/
 ├── di/                         # Injeção de dependências (Koin)
 ├── model/                      # UiStates e modelos da camada de apresentação
 ├── ui/
-│   ├── components/             # Componentes reutilizáveis (Composables)
+│   ├── component/              # Componentes reutilizáveis (Composables)
 │   ├── navigation/             # Navegação (Rotas tipadas com Parcelable)
 │   ├── screen/                 # Telas do aplicativo
 │   └── theme/                  # Tema (Color, Type, Theme)
